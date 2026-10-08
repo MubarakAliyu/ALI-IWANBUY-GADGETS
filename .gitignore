@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# env
+.env
+.env.*
+!.env.example
+
+# runtime data
+server/uploads/
+server/.local/
+client/public/images/
+
+# test artefacts
+playwright-report/
+test-results/
+blob-report/
+coverage/
+.lighthouse/
+
+# editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

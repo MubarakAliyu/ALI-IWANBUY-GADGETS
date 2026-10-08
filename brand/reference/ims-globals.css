@@ -1,0 +1,375 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * IWAN-IMS design tokens (PRD §13, v1.1).
+ *
+ * Tailwind's default palette, font stacks, radii, shadows and type sizes are reset, so the only colours,
+ * sizes and radii that exist are the ones below. A later batch cannot reach for `bg-blue-500` or `text-lg`;
+ * it composes these tokens instead. `src/styles/tokens.ts` mirrors the colour values for the style guide and
+ * the contrast tests, and `tests/unit/tokens.test.ts` keeps the two in step.
+ */
+@theme {
+  --color-*: initial;
+  --font-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-*: initial;
+
+  /* Brand core — contractual */
+  --color-brand-primary: #156fbf;
+  --color-brand-navy: #1e2a35;
+  --color-brand-grey: #88939e;
+  --color-brand-white: #ffffff;
+  --color-white: #ffffff;
+
+  /* Accessible text and focus (PRD v1.1) */
+  --color-text-muted: #646f7a;
+  --color-focus-on-dark: #6ba5dd;
+  --color-on-dark: #ffffff;
+  --color-on-dark-muted: #c3cad1;
+  --color-on-dark-accent: #a2c7eb;
+
+  /* Derived primary scale — UI states only */
+  --color-primary-50: #eaf2fa;
+  --color-primary-100: #d0e3f5;
+  --color-primary-200: #a2c7eb;
+  --color-primary-300: #6ba5dd;
+  --color-primary-400: #3b89ce;
+  --color-primary-500: #156fbf;
+  --color-primary-600: #115a9a;
+  --color-primary-700: #0d4475;
+  --color-primary-800: #092e50;
+  --color-primary-900: #051a2e;
+
+  /* Neutrals */
+  --color-navy-900: #1e2a35;
+  --color-navy-800: #2a3947;
+  --color-navy-700: #3a4b5b;
+  --color-grey-500: #88939e;
+  --color-grey-300: #c3cad1;
+  --color-grey-200: #dfe4e8;
+  --color-grey-100: #f1f4f6;
+  --color-grey-50: #f8fafb;
+
+  /* Semantic */
+  --color-success: #16a34a;
+  --color-success-text: #15803d;
+  --color-success-tint: #eaf7ee;
+  --color-success-border: #b7e1c3;
+  --color-warning: #d97706;
+  --color-warning-text: #b45309;
+  --color-warning-tint: #fef6e7;
+  --color-danger: #dc2626;
+  --color-danger-text: #b91c1c;
+  --color-danger-tint: #fdecec;
+  --color-danger-border: #f5c2c2;
+  --color-info: #156fbf;
+
+  /* Stock-unit status badges (PRD §13.1) */
+  --color-status-in-stock: #15803d;
+  --color-status-in-stock-bg: #eaf7ee;
+  --color-status-reserved: #b45309;
+  --color-status-reserved-bg: #fef6e7;
+  --color-status-sold: #115a9a;
+  --color-status-sold-bg: #eaf2fa;
+  --color-status-returned: #3a4b5b;
+  --color-status-returned-bg: #f1f4f6;
+  --color-status-faulty: #b91c1c;
+  --color-status-faulty-bg: #fdecec;
+  --color-status-in-repair: #6d28d9;
+  --color-status-in-repair-bg: #f3eefc;
+
+  /* shadcn/ui semantic names, bound to brand values so every primitive inherits the brand */
+  --color-background: #ffffff;
+  --color-foreground: #1e2a35;
+  --color-card: #ffffff;
+  --color-card-foreground: #1e2a35;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1e2a35;
+  --color-primary: #156fbf;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #ffffff;
+  --color-secondary-foreground: #1e2a35;
+  --color-muted: #f1f4f6;
+  --color-muted-foreground: #646f7a;
+  --color-accent: #eaf2fa;
+  --color-accent-foreground: #1e2a35;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #dfe4e8;
+  --color-input: #dfe4e8;
+  --color-ring: #156fbf;
+
+  /* Typography — Montserrat only (PRD §13.2). Never below 12px. */
+  --font-sans: var(--font-montserrat), sans-serif;
+
+  --text-display: 3rem;
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 700;
+  --text-h1: 2rem;
+  --text-h1--line-height: 1.2;
+  --text-h1--font-weight: 700;
+  --text-h2: 1.5rem;
+  --text-h2--line-height: 1.3;
+  --text-h2--font-weight: 600;
+  --text-h3: 1.25rem;
+  --text-h3--line-height: 1.4;
+  --text-h3--font-weight: 600;
+  --text-h4: 1rem;
+  --text-h4--line-height: 1.5;
+  --text-h4--font-weight: 500;
+  --text-kpi: 1.75rem;
+  --text-kpi--line-height: 1.2;
+  --text-kpi--font-weight: 700;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-lead: 0.9375rem;
+  --text-lead--line-height: 1.6;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.5;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.4;
+  --text-label--letter-spacing: 0.04em;
+  --text-label--font-weight: 600;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+
+  /* Radii and elevation (PRD §13.3) — rounded-full and shadow-none remain available */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(30, 42, 53, 0.06);
+  --shadow-md: 0 4px 12px rgba(30, 42, 53, 0.08);
+  --shadow-lg: 0 12px 32px rgba(30, 42, 53, 0.12);
+
+  /* Motion (PRD §13.3) */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-press: 150ms;
+  --duration-panel: 200ms;
+  --duration-modal: 250ms;
+
+  --animate-shake: shake 320ms var(--ease-out);
+  --animate-caret-blink: caret-blink 1.2s ease-out infinite;
+
+  @keyframes caret-blink {
+    0%,
+    70%,
+    100% {
+      opacity: 1;
+    }
+    20%,
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20%,
+    60% {
+      transform: translateX(-8px);
+    }
+    40%,
+    80% {
+      transform: translateX(8px);
+    }
+  }
+}
+
+/*
+ * Interaction variants also match `data-preview`, so the style guide can render hover, active and focus states
+ * statically with the real component classes. Hover stays behind `(hover: hover)` to avoid sticky hover on touch.
+ */
+@custom-variant hover {
+  @media (hover: hover) {
+    &:hover {
+      @slot;
+    }
+  }
+  &[data-preview~="hover"] {
+    @slot;
+  }
+}
+
+@custom-variant active {
+  &:active {
+    @slot;
+  }
+  &[data-preview~="active"] {
+    @slot;
+  }
+}
+
+@custom-variant focus-visible {
+  &:focus-visible {
+    @slot;
+  }
+  &[data-preview~="focus"] {
+    @slot;
+  }
+}
+
+/* Money, IMEIs, serials and counts: tabular lining figures so columns never jitter (PRD §13.2). */
+@utility numeric {
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: 0.02em;
+}
+
+/*
+ * Slim scrollbars (Batch 5 §5.1b, ADR-032). One treatment for every scrollbar in the app: 6px, a fully rounded
+ * thumb, a transparent track and no arrow buttons. Slimmed, never hidden.
+ *
+ * - The thumb is a brand token mixed with transparency, at least 3:1 against the surface it sits on at rest
+ *   (`scrollbarThumbs` in src/styles/tokens.ts, measured by tests/unit/scrollbar.test.ts): navy on light surfaces,
+ *   white on navy. Any `[data-surface="dark"]` area — the sidebar, the drawer — switches to the dark thumb by itself.
+ * - `.scroll-slim` and `.scroll-slim-on-dark` mark the app's own scroll containers: they pin the variant and keep a
+ *   scroll inside them from dragging the page along. The pseudo-element rules below also cover any scroller that
+ *   has no class, so a default OS scrollbar cannot appear anywhere.
+ * - Chromium and Safari draw the `::-webkit-scrollbar` rules. Firefox has no such pseudo-elements and gets the
+ *   standard properties. They are set only there, because from Chromium 121 the standard properties would switch
+ *   the pseudo-elements off and bring back a wider bar. macOS and iOS overlay scrollbars need nothing: macOS draws
+ *   this 6px bar, and iOS keeps its own overlay.
+ */
+:root {
+  --scrollbar-thumb: color-mix(in srgb, var(--color-brand-navy) 55%, transparent);
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--color-brand-navy) 70%, transparent);
+  --scrollbar-thumb-active: color-mix(in srgb, var(--color-brand-navy) 85%, transparent);
+}
+
+.scroll-slim {
+  --scrollbar-thumb: color-mix(in srgb, var(--color-brand-navy) 55%, transparent);
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--color-brand-navy) 70%, transparent);
+  --scrollbar-thumb-active: color-mix(in srgb, var(--color-brand-navy) 85%, transparent);
+}
+
+/* After .scroll-slim, so a navy surface that is also a light-classed scroller (the drawer's sheet) stays dark. */
+[data-surface="dark"],
+.scroll-slim-on-dark {
+  --scrollbar-thumb: color-mix(in srgb, var(--color-brand-white) 40%, transparent);
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--color-brand-white) 55%, transparent);
+  --scrollbar-thumb-active: color-mix(in srgb, var(--color-brand-white) 70%, transparent);
+}
+
+.scroll-slim,
+.scroll-slim-on-dark {
+  overscroll-behavior: contain;
+}
+
+/* 6px: the spacing scale's 1.5 step, so the bar is on the same grid as everything else. */
+::-webkit-scrollbar {
+  width: calc(var(--spacing) * 1.5);
+  height: calc(var(--spacing) * 1.5);
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: var(--scrollbar-thumb);
+}
+
+:hover::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-thumb-active);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+}
+
+/*
+ * A 16px fade at the top and bottom of a scroll area (`<ScrollFade>`), shown only while there is more to scroll that
+ * way. It stops short of the 6px scrollbar so the thumb is never covered, and the scroll area's
+ * `scroll-padding-block` keeps anything that gains focus 16px clear of both edges, so it never covers a focus ring.
+ */
+@utility scroll-fade-edge {
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0 calc(var(--spacing) * 1.5);
+  height: calc(var(--spacing) * 4);
+  transition: opacity var(--duration-press) var(--ease-out);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-brand-navy);
+    background-color: var(--color-brand-white);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  /* Focus is always visible: 2px brand blue with a 2px offset on light, focus-on-dark on navy surfaces. */
+  :focus-visible,
+  [data-preview~="focus"] {
+    outline: 2px solid var(--color-brand-primary);
+    outline-offset: 2px;
+  }
+
+  [data-surface="dark"] :focus-visible,
+  [data-surface="dark"] [data-preview~="focus"] {
+    outline-color: var(--color-focus-on-dark);
+  }
+
+  /* Browser autofill keeps the white field and navy text instead of the default yellow. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  [data-preview~="autofill"] {
+    -webkit-text-fill-color: var(--color-brand-navy);
+    -webkit-box-shadow: 0 0 0 1000px var(--color-brand-white) inset;
+    box-shadow: 0 0 0 1000px var(--color-brand-white) inset;
+    caret-color: var(--color-brand-navy);
+    transition: background-color 9999s ease-out 0s;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  /* Reduced motion: no panel, dialog or shake animation. Loading spinners keep their plain rotation. */
+  @media (prefers-reduced-motion: reduce) {
+    *:not([data-essential-motion]),
+    *:not([data-essential-motion])::before,
+    *:not([data-essential-motion])::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
