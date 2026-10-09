@@ -11,6 +11,35 @@
 
 ---
 
+## PART 0 — Client details received 9 Oct 2026 (apply first, commit separately)
+
+The owner has supplied the real store details. Apply them before feature work, in one commit
+("Apply the owner's store details"), and record ADR-017 (already drafted in `docs/DECISIONS.md`).
+
+| Field | Value |
+|---|---|
+| Shop address (storefront, footer, contact page, pickup copy, emails **and invoices**) | Shop No. 26, Bindawa Plaza, Ahmadu Bello Way, Birnin Kebbi, Kebbi State, Nigeria |
+| Store email (contact page, footer, invoices, `reply-to` on every email) | iwanbuygadgets@gmail.com |
+| Phone / WhatsApp | +234 703 925 4143 (unchanged) |
+| Bank — bank name | Moniepoint |
+| Bank — account name | ALI ABDULLAHI |
+| Bank — account number | 5737727740 |
+| Opening hours | Monday – Friday 8:00 am – 10:00 pm · Saturday – Sunday 10:00 am – 10:00 pm |
+
+- [ ] Seed `Setting` with these values (replace every `UPDATE IN SETTINGS` placeholder) and add an `openingHours`
+      field (`[{ days, opens, closes }]`) so the owner can edit hours in Store Settings (Part F).
+- [ ] Write a small idempotent migration script (`pnpm settings:apply-defaults`) that updates the existing
+      `Setting` document in a database that was seeded earlier, without touching products, customers or orders.
+      Run it against the local database.
+- [ ] Storefront reads all of the above from public settings — no hard-coded address, email, bank or hours left
+      in `client/` (grep for "Olumbo", "Olumbu", "UPDATE IN SETTINGS" must return nothing outside docs/history).
+- [ ] The checkout success page now shows the real bank details with copy buttons (the "please phone us"
+      fallback stays only for when settings are empty).
+- [ ] The bank details appear on invoices (Part D).
+- [ ] Do **not** put any SMTP password in the repo. The store email is used for display and `reply-to`; sending
+      from it needs a Gmail App Password in `SMTP_*` env vars, which the student sets locally and on Render.
+      Document the Gmail SMTP settings (`smtp.gmail.com`, port 465, TLS, app password) in `docs/DEPLOYMENT.md`.
+
 ## PART A — Admin auth, roles, PIN
 
 - [ ] `Admin` model; seed adds OWNER, MANAGER, STAFF (OWNER + MANAGER with PINs), plus 6 customers and ~60

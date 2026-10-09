@@ -95,3 +95,11 @@ storefront layout, so the sign-in and registration pages — which live in their
 stored cart. The merge that runs at sign-in therefore sent an empty cart and silently emptied it. The cart
 belongs to the browser rather than to a route group, so it is now read back in the root layout, where every
 page has it.
+
+**ADR-017 · 9 Oct 2026 · Owner's store details (resolves OPEN-001 and OPEN-002).** The owner confirmed the shop
+address as **Shop No. 26, Bindawa Plaza, Ahmadu Bello Way, Birnin Kebbi, Kebbi State** — used everywhere,
+including invoices, replacing both the "Olumbo Plaza" (registration paperwork) and "Olumbu Plaza" (flyer)
+versions. Store email iwanbuygadgets@gmail.com. Bank for transfers: Moniepoint · ALI ABDULLAHI · 5737727740 —
+shown to every customer at checkout and on invoices, so it is public-facing data and is seeded, editable in Store
+Settings. Opening hours: Mon–Fri 8 am–10 pm, Sat–Sun 10 am–10 pm (resolves the assumed hours). SMTP credentials
+are never committed.
