@@ -1,11 +1,11 @@
 # Progress
 
-| Batch                                             | Branch                           | Status         | Commit | Date       |
-| ------------------------------------------------- | -------------------------------- | -------------- | ------ | ---------- |
-| 0 — Planning (overview, batch prompts, brand kit) | —                                | ✅ Done        | —      | 8 Oct 2026 |
-| 1 — Foundation & Storefront                       | `batch/01-foundation-storefront` | ✅ Done        |        | 9 Oct 2026 |
-| 2 — Accounts, wishlist & checkout                 | `batch/02-accounts-checkout`     | ⏳ Not started |        |            |
-| 3 — Admin dashboard, deployment & pitch           | `batch/03-admin`                 | ⏳ Not started |        |            |
+| Batch                                             | Branch                           | Status         | Commit    | Date       |
+| ------------------------------------------------- | -------------------------------- | -------------- | --------- | ---------- |
+| 0 — Planning (overview, batch prompts, brand kit) | —                                | ✅ Done        | —         | 8 Oct 2026 |
+| 1 — Foundation & Storefront                       | `batch/01-foundation-storefront` | ✅ Done        | `fd71b5e` | 9 Oct 2026 |
+| 2 — Accounts, wishlist & checkout                 | `batch/02-accounts-checkout`     | ⏳ Not started |           |            |
+| 3 — Admin dashboard, deployment & pitch           | `batch/03-admin`                 | ⏳ Not started |           |            |
 
 ## Batch log
 
