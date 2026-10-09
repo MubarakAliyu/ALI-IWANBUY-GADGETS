@@ -53,7 +53,7 @@ export function ProductCard({
           ) : null}
         </div>
 
-        <WishlistHeart productName={product.name} className="absolute top-2 right-2" />
+        <WishlistHeart productId={product.id} productName={product.name} className="absolute top-2 right-2" />
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">

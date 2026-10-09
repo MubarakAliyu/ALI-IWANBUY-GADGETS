@@ -33,26 +33,33 @@ an opportunity to showcase the project's objectives, outcomes, and findings.
 
 ## Coverage checklist (Claude Code ticks each row and fills "Where" as it builds)
 
-| #    | Lab requirement                                                                                           | Batch | Where                                                                                    | Done                |
-| ---- | --------------------------------------------------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------------- | ------------------- |
-| P1.1 | UI built with **ReactJS** (Next.js 15 / React 19 — a React framework; state this in the README and pitch) | 1     | `client/` — Next.js 15, React 19                                                         | ✅                  |
-| P1.2 | Layout — header, footer, page grids, admin shell                                                          | 1, 3  | `app/(store)/layout.tsx`, `components/store/site-header.tsx`, `site-footer.tsx`          | ✅ storefront       |
-| P1.3 | Navigation — category menu, search, account menu, mobile drawer, breadcrumbs                              | 1–2   | `components/store/` — category-menu, mobile-nav, search-box, header-actions, breadcrumbs | ✅ guest            |
-| P1.4 | Styling — brand design system (tokens, Montserrat, components), style guide page                          | 1     | `app/globals.css`, `components/ui/*` (21 primitives), `/style-guide`                     | ✅                  |
-| P1.5 | Visually appealing & easy to navigate — Lighthouse a11y ≥ 90, axe clean                                   | 1–3   | Lighthouse a11y 100/100, axe clean — `docs/PROGRESS.md`                                  | ✅ Batch 1 pages    |
-| P1.6 | Responsive on all devices — verified at 360 / 768 / 1280 / 1920, E2E on desktop + mobile                  | 1–3   | `client/e2e/*` — desktop + Pixel 7, 28 tests                                             | ✅ Batch 1 pages    |
-| P2.1 | Server-side with **Node.js + Express**                                                                    | 1     | `server/` — Express 5 on Node 22                                                         | ✅                  |
-| P2.2 | API endpoints — **user authentication** (customer + admin)                                                | 2, 3  | `server/src/routes/auth*.ts`                                                             | ☐                   |
-| P2.3 | API endpoints — **product management** (public catalogue + admin CRUD, images, stock)                     | 1, 3  | `server/src/routes/catalog.routes.ts`, `services/catalog.service.ts`                     | ✅ public catalogue |
-| P2.4 | API endpoints — **order processing** (checkout, lifecycle, payments, invoices)                            | 2, 3  | `server/src/routes/orders*.ts`                                                           | ☐                   |
-| P2.5 | Database — MongoDB (completes MERN)                                                                       | 1     | `server/src/models/*` — Mongoose 8                                                       | ✅                  |
-| P2.6 | API documentation — endpoint reference                                                                    | 3     | `docs/API.md`                                                                            | ☐                   |
-| P3.1 | Production hosting set up — client (Vercel), API (Render), DB (MongoDB Atlas)                             | 3     | `docs/DEPLOYMENT.md`                                                                     | ☐                   |
-| P3.2 | Server configured — env vars, CORS, secure cookies, health check, logs, seed for demo                     | 3     | `docs/DEPLOYMENT.md`                                                                     | ☐                   |
-| P3.3 | Tested thoroughly in production — smoke checklist + Playwright run against the live URL                   | 3     | `docs/DEPLOYMENT.md` § Production test report                                            | ☐                   |
-| P3.4 | Runs smoothly — Lighthouse on live URL, no console errors, uptime check                                   | 3     | `docs/DEPLOYMENT.md`                                                                     | ☐                   |
-| P4.1 | Pitch — purpose & significance, objectives, outcomes, findings                                            | 3     | `docs/PITCH.md`                                                                          | ☐                   |
-| P4.2 | Live demo script + demo accounts + screenshots                                                            | 3     | `docs/PITCH.md`, `docs/screenshots/`                                                     | ☐                   |
+| #    | Lab requirement                                                                                           | Batch | Where                                                                                   | Done                    |
+| ---- | --------------------------------------------------------------------------------------------------------- | ----- | --------------------------------------------------------------------------------------- | ----------------------- |
+| P1.1 | UI built with **ReactJS** (Next.js 15 / React 19 — a React framework; state this in the README and pitch) | 1     | `client/` — Next.js 15, React 19                                                        | ✅                      |
+| P1.2 | Layout — header, footer, page grids, admin shell                                                          | 1, 3  | `app/(store)/layout.tsx`, `components/store/site-header.tsx`, `site-footer.tsx`         | ✅ storefront           |
+| P1.3 | Navigation — category menu, search, account menu, mobile drawer, breadcrumbs                              | 1–2   | `components/store/*`, `components/account/account-nav.tsx`                              | ✅                      |
+| P1.4 | Styling — brand design system (tokens, Montserrat, components), style guide page                          | 1     | `app/globals.css`, `components/ui/*` (21 primitives), `/style-guide`                    | ✅                      |
+| P1.5 | Visually appealing & easy to navigate — Lighthouse a11y ≥ 90, axe clean                                   | 1–3   | Lighthouse a11y 100/100, axe clean — `docs/PROGRESS.md`                                 | ✅ Batch 1 pages        |
+| P1.6 | Responsive on all devices — verified at 360 / 768 / 1280 / 1920, E2E on desktop + mobile                  | 1–3   | `client/e2e/*` — desktop + Pixel 7, 28 tests                                            | ✅ Batch 1 pages        |
+| P2.1 | Server-side with **Node.js + Express**                                                                    | 1     | `server/` — Express 5 on Node 22                                                        | ✅                      |
+| P2.2 | API endpoints — **user authentication** (customer + admin)                                                | 2, 3  | `server/src/routes/customer.routes.ts`, `services/auth.service.ts`                      | ✅ customer             |
+| P2.3 | API endpoints — **product management** (public catalogue + admin CRUD, images, stock)                     | 1, 3  | `server/src/routes/catalog.routes.ts`, `services/catalog.service.ts`                    | ✅ public catalogue     |
+| P2.4 | API endpoints — **order processing** (checkout, lifecycle, payments, invoices)                            | 2, 3  | `server/src/services/order.service.ts`, `lib/order-lifecycle.ts`, `jobs/auto-cancel.ts` | ✅ checkout + lifecycle |
+| P2.5 | Database — MongoDB (completes MERN)                                                                       | 1     | `server/src/models/*` — Mongoose 8                                                      | ✅                      |
+| P2.6 | API documentation — endpoint reference                                                                    | 3     | `docs/API.md`                                                                           | ☐                       |
+| P3.1 | Production hosting set up — client (Vercel), API (Render), DB (MongoDB Atlas)                             | 3     | `docs/DEPLOYMENT.md`                                                                    | ☐                       |
+| P3.2 | Server configured — env vars, CORS, secure cookies, health check, logs, seed for demo                     | 3     | `docs/DEPLOYMENT.md`                                                                    | ☐                       |
+| P3.3 | Tested thoroughly in production — smoke checklist + Playwright run against the live URL                   | 3     | `docs/DEPLOYMENT.md` § Production test report                                           | ☐                       |
+| P3.4 | Runs smoothly — Lighthouse on live URL, no console errors, uptime check                                   | 3     | `docs/DEPLOYMENT.md`                                                                    | ☐                       |
+| P4.1 | Pitch — purpose & significance, objectives, outcomes, findings                                            | 3     | `docs/PITCH.md`                                                                         | ☐                       |
+| P4.2 | Live demo script + demo accounts + screenshots                                                            | 3     | `docs/PITCH.md`, `docs/screenshots/`                                                    | ☐                       |
+
+## Batch 2 coverage note (9 Oct 2026)
+
+Phase 2's authentication and order-processing endpoints now exist for the customer side: register, sign in,
+sign out, the account area, the wishlist, the server cart, and the whole order lifecycle from checkout to
+cancellation. What is left of Phase 2 is the admin half (product management writes, payment confirmation,
+invoices) and the API reference, all in Batch 3 — along with deployment (P3.x) and the pitch (P4.x).
 
 ## Batch 1 coverage note (9 Oct 2026)
 

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { CartHydrator } from "@/components/store/cart-hydrator";
 import { Toaster } from "@/components/ui/toaster";
 import { SITE } from "@/lib/site";
 import { THEME_COLOUR } from "@/styles/tokens";
@@ -34,7 +35,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-NG" className={montserrat.variable}>
       <body className="min-h-dvh bg-white text-brand-navy antialiased">
-        <Providers>{children}</Providers>
+        <Providers>
+          {/* The cart lives in the browser, so it is read back on every page — including sign-in, where
+              it has to be present for the merge that follows (AC2.2). */}
+          <CartHydrator />
+          {children}
+        </Providers>
         <Toaster />
       </body>
     </html>

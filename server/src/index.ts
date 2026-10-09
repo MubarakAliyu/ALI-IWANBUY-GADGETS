@@ -1,6 +1,7 @@
 import { createApp } from "./app.js";
 import { env } from "./config/env.js";
 import { connectDatabase, disconnectDatabase } from "./db.js";
+import { startAutoCancelJob } from "./jobs/auto-cancel.js";
 import { logger } from "./lib/logger.js";
 
 async function start(): Promise<void> {
@@ -10,8 +11,12 @@ async function start(): Promise<void> {
     logger.info(`API listening on http://localhost:${env.PORT} (${env.NODE_ENV})`);
   });
 
+  // Background work belongs to the process, not to the app factory, so tests never acquire a timer.
+  const stopAutoCancel = startAutoCancelJob();
+
   const shutdown = (signal: string) => {
     logger.info({ signal }, "Shutting down");
+    stopAutoCancel();
     server.close(() => {
       void disconnectDatabase().then(() => process.exit(0));
     });

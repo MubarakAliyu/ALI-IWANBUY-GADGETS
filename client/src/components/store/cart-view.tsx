@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { CartReportedIssue } from "@aib/shared";
 import Image from "next/image";
 import Link from "next/link";
-import { QueryClient, QueryClientProvider, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { AlertTriangleIcon, ShoppingBagIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -32,17 +32,6 @@ const ISSUE_MESSAGE: Record<CartReportedIssue["issue"], (issue: CartReportedIssu
  * in localStorage — with every correction shown plainly rather than silently applied.
  */
 export function CartView() {
-  // The query client is created here rather than in the root layout, so only this page carries it.
-  const [queryClient] = useState(() => new QueryClient({ defaultOptions: { queries: { retry: 1 } } }));
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <CartContents />
-    </QueryClientProvider>
-  );
-}
-
-function CartContents() {
   const lines = useCartStore((state) => state.lines);
   const hydrated = useCartStore((state) => state.hydrated);
   const setQty = useCartStore((state) => state.setQty);
@@ -202,7 +191,7 @@ function CartContents() {
           </p>
 
           <Button asChild size="hero" className="w-full">
-            <Link href="/login?next=/checkout">Proceed to checkout</Link>
+            <Link href="/checkout">Proceed to checkout</Link>
           </Button>
 
           <Button asChild variant="ghost" className="w-full">

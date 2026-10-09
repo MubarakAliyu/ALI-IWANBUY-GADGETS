@@ -1,5 +1,4 @@
 import type { CategoryNode } from "@aib/shared";
-import { CartHydrator } from "@/components/store/cart-hydrator";
 import { SiteFooter } from "@/components/store/site-footer";
 import { SiteHeader } from "@/components/store/site-header";
 import { getCategories } from "@/lib/catalog";
@@ -31,7 +30,6 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         Skip to content
       </a>
 
-      <CartHydrator />
       <SiteHeader categories={categories} />
       <main id="main" className="flex-1">
         {children}

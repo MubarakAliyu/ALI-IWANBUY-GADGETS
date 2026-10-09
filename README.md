@@ -66,6 +66,9 @@ out. Product images are generated placeholders written to `server/uploads/seed/`
 replaces them with real photographs from the admin dashboard. The seed refuses to run with
 `NODE_ENV=production`.
 
+There are no customer accounts in the seed: create one at <http://localhost:3000/register>. Admins and order
+history arrive with the dashboard in Batch 3.
+
 ### 4. Run it
 
 ```bash
@@ -75,6 +78,13 @@ pnpm dev
 - Storefront — <http://localhost:3000>
 - API — <http://localhost:4000/api/health>
 - Design system (development only) — <http://localhost:3000/style-guide>
+
+### Email in development
+
+There is no SMTP server in development, so every message the shop sends — welcome, order placed, order
+cancelled, status changed — is written to `server/.local/outbox/<timestamp>-<template>.html` and its path is
+logged. Open the file in a browser to read exactly what the customer would have received. Setting `SMTP_HOST`
+in `server/.env` switches to real delivery with no other change.
 
 ---
 
@@ -121,7 +131,17 @@ build output ends up unusable.
   arithmetic happens, and it runs in `bigint`.
 - Business rules live in `server/src/services/`. Controllers only read the request and send the result.
 
+## Where the money rules live
+
+Three pieces of this codebase are worth reading before changing anything near them:
+
+- **`server/src/services/order.service.ts`** — `placeOrder` runs in one transaction, ignores every price the
+  browser sends, and decrements stock with a conditional update that only matches while enough is left. Two
+  customers racing for the last unit produce one order and one honest refusal.
+- **`server/src/lib/order-lifecycle.ts`** — the single table of which status may follow which, and who may make
+  the move. Nothing writes `status` without going through `assertTransition`.
+- **`shared/src/money.ts`** — the only place naira arithmetic happens, in `bigint`, on integer kobo.
+
 ## Demo
 
-There are no customer or admin accounts yet — Batch 1 is the guest-facing shop. Accounts and checkout arrive
-in Batch 2, the admin dashboard in Batch 3.
+Register an account at `/register` — there are no seeded customers. The admin dashboard arrives in Batch 3.

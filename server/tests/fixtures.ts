@@ -5,7 +5,17 @@
 
 import type { ProductCondition, ProductStatus } from "@aib/shared";
 import type { Types } from "mongoose";
-import { Brand, Category, Counter, Product, Setting } from "../src/models/index.js";
+import {
+  AuditLog,
+  Brand,
+  Cart,
+  Category,
+  Counter,
+  Customer,
+  Order,
+  Product,
+  Setting,
+} from "../src/models/index.js";
 
 export type Fixture = {
   categories: Record<string, Types.ObjectId>;
@@ -104,6 +114,11 @@ export async function clearDatabase(): Promise<void> {
     Product.deleteMany({}),
     Setting.deleteMany({}),
     Counter.deleteMany({}),
+    Customer.deleteMany({}),
+    Cart.deleteMany({}),
+    Order.deleteMany({}),
+    // The audit model refuses deletes by design, so the test reset goes around it at the driver level.
+    AuditLog.collection.deleteMany({}),
   ]);
 }
 

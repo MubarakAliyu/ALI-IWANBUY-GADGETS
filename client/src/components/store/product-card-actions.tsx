@@ -4,6 +4,7 @@ import type { ProductCard as ProductCardData } from "@aib/shared";
 import { useRouter } from "next/navigation";
 import { HeartIcon, PlusIcon, SlidersHorizontalIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useWishlist } from "@/components/account/use-wishlist";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { useCartStore } from "@/stores/cart";
@@ -77,26 +78,36 @@ export function AddToCartIconButton({
 }
 
 /**
- * The wishlist heart. Wishlists need an account, which Batch 2 builds; until then the heart explains that and
- * offers the sign-in page, rather than pretending to save something.
+ * The wishlist heart (S-7). It fills the moment it is pressed; signing in is offered to anyone who is not,
+ * and the request happens behind the scenes.
  */
-export function WishlistHeart({ productName, className }: { productName: string; className?: string }) {
-  const router = useRouter();
+export function WishlistHeart({
+  productId,
+  productName,
+  className,
+}: {
+  productId: string;
+  productName: string;
+  className?: string;
+}) {
+  const { toggle, isSaved } = useWishlist();
+  const saved = isSaved(productId);
 
   return (
     <Button
       variant="ghost"
       size="icon-sm"
-      aria-label={`Save ${productName} to your wishlist`}
-      className={cn("relative z-10 bg-white/90 text-text-muted hover:text-brand-primary", className)}
-      onClick={() => {
-        toast("Sign in to save items", {
-          description: "Your wishlist is kept with your account.",
-          action: { label: "Sign in", onClick: () => router.push("/login?next=/account/wishlist") },
-        });
-      }}
+      aria-pressed={saved}
+      aria-label={saved ? `Remove ${productName} from your wishlist` : `Save ${productName} to your wishlist`}
+      data-testid="wishlist-heart"
+      className={cn(
+        "relative z-10 bg-white/90 hover:text-brand-primary",
+        saved ? "text-brand-primary" : "text-text-muted",
+        className,
+      )}
+      onClick={() => toggle(productId, productName)}
     >
-      <HeartIcon aria-hidden="true" className="size-4" />
+      <HeartIcon aria-hidden="true" className="size-4" fill={saved ? "currentColor" : "none"} />
     </Button>
   );
 }

@@ -182,6 +182,26 @@ async function categoryBranchIds(slug: string): Promise<Types.ObjectId[] | null>
   return [category._id, ...children.map((child) => child._id)];
 }
 
+/**
+ * Product cards for a known set of ids, in the order the ids were given — what the wishlist shows. Ids that
+ * no longer point at an active product are simply absent, so a withdrawn product disappears from a wishlist
+ * rather than breaking it.
+ */
+export async function productCardsByIds(ids: readonly string[]): Promise<ProductCard[]> {
+  if (ids.length === 0) {
+    return [];
+  }
+  const docs = await Product.find({ _id: { $in: ids }, status: "ACTIVE" })
+    .select(CARD_FIELDS)
+    .populate("brand", "name slug")
+    .populate("category", "name slug")
+    .lean()
+    .exec();
+
+  const cards = new Map((docs as unknown as LeanProduct[]).map((doc) => [doc._id.toString(), toCard(doc)]));
+  return ids.map((id) => cards.get(id)).filter((card): card is ProductCard => card !== undefined);
+}
+
 export async function getCategoryTree(): Promise<CategoryNode[]> {
   const [categories, counts] = await Promise.all([
     Category.find({ isActive: true }).sort({ sortOrder: 1, name: 1 }).lean().exec(),

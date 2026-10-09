@@ -23,8 +23,12 @@ const envSchema = z
     /** The single browser origin allowed to call the API with credentials. */
     CLIENT_ORIGIN: z.string().url().default("http://localhost:3000"),
 
-    /** Signing keys for the two session realms (customer and admin). Used from Batch 2. */
-    CUSTOMER_JWT_SECRET: z.string().min(24).optional(),
+    /**
+     * Signing keys for the two session realms. The customer realm is in use from Batch 2, so its key is
+     * required everywhere; `.env.example` ships a development value to replace in production. The admin key
+     * joins it in Batch 3.
+     */
+    CUSTOMER_JWT_SECRET: z.string().min(24, "must be at least 24 characters"),
     ADMIN_JWT_SECRET: z.string().min(24).optional(),
 
     /** Where uploaded and generated product images live. `local` writes under `server/uploads`. */
@@ -44,7 +48,7 @@ const envSchema = z
     if (env.NODE_ENV !== "production") {
       return;
     }
-    for (const key of ["CUSTOMER_JWT_SECRET", "ADMIN_JWT_SECRET"] as const) {
+    for (const key of ["ADMIN_JWT_SECRET"] as const) {
       if (!env[key]) {
         ctx.addIssue({
           code: "custom",

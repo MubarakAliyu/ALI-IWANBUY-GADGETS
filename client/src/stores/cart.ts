@@ -100,8 +100,8 @@ export const useCartStore = create<CartState>()(
       clear: () => set({ lines: [] }),
 
       applyValidation: (result) =>
-        set(() => ({
-          lines: result.items
+        set((state) => {
+          const lines: CartLine[] = result.items
             .filter((item) => item.qty > 0)
             .map((item) => ({
               productId: item.productId,
@@ -114,8 +114,12 @@ export const useCartStore = create<CartState>()(
               unitPriceKobo: item.unitPriceKobo,
               qty: item.qty,
               stock: item.stock,
-            })),
-        })),
+            }));
+
+          // Most validations change nothing. Keeping the existing array in that case means the cart page does
+          // not re-render — and nothing a customer is in the middle of clicking is replaced underneath them.
+          return sameLines(state.lines, lines) ? state : { lines };
+        }),
     }),
     {
       name: CART_STORAGE_KEY,
@@ -148,6 +152,24 @@ export function useCartHydration(): void {
   useEffect(() => {
     void useCartStore.persist.rehydrate();
   }, []);
+}
+
+/** Whether two sets of lines say the same thing — same items, same quantities, same prices. */
+function sameLines(current: readonly CartLine[], next: readonly CartLine[]): boolean {
+  if (current.length !== next.length) {
+    return false;
+  }
+  return current.every((line, index) => {
+    const other = next[index];
+    return (
+      other !== undefined &&
+      line.productId === other.productId &&
+      line.variantId === other.variantId &&
+      line.qty === other.qty &&
+      line.unitPriceKobo === other.unitPriceKobo &&
+      line.stock === other.stock
+    );
+  });
 }
 
 export function cartCount(lines: CartLine[]): number {

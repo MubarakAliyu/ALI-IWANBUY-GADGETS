@@ -5,6 +5,7 @@ import type { ProductDetail } from "@aib/shared";
 import { useRouter } from "next/navigation";
 import { HeartIcon, ShoppingBagIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useWishlist } from "@/components/account/use-wishlist";
 import { Button } from "@/components/ui/button";
 import { PriceTag } from "@/components/ui/price-tag";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
@@ -24,6 +25,8 @@ export function ProductPurchase({ product }: { product: ProductDetail }) {
   const router = useRouter();
   const add = useCartStore((state) => state.add);
   const setMiniCartOpen = useUiStore((state) => state.setMiniCartOpen);
+  const { toggle: toggleWishlist, isSaved } = useWishlist();
+  const saved = isSaved(product.id);
 
   const firstInStock = product.variants.findIndex((variant) => variant.stock > 0);
   const [selectedId, setSelectedId] = useState(
@@ -144,16 +147,16 @@ export function ProductPurchase({ product }: { product: ProductDetail }) {
 
       <Button
         variant="ghost"
-        className="justify-start gap-2 px-0 text-text-muted hover:bg-transparent hover:text-brand-primary"
-        onClick={() =>
-          toast("Sign in to save items", {
-            description: "Your wishlist is kept with your account.",
-            action: { label: "Sign in", onClick: () => router.push("/login?next=/account/wishlist") },
-          })
-        }
+        aria-pressed={saved}
+        data-testid="wishlist-toggle"
+        className={cn(
+          "justify-start gap-2 px-0 hover:bg-transparent hover:text-brand-primary",
+          saved ? "text-brand-primary" : "text-text-muted",
+        )}
+        onClick={() => toggleWishlist(product.id, product.name)}
       >
-        <HeartIcon aria-hidden="true" className="size-4" />
-        Save to wishlist
+        <HeartIcon aria-hidden="true" className="size-4" fill={saved ? "currentColor" : "none"} />
+        {saved ? "Saved to your wishlist" : "Save to wishlist"}
       </Button>
     </div>
   );

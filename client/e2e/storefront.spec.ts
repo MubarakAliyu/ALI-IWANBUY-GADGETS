@@ -54,10 +54,12 @@ test.describe("shop filters", () => {
 
     const filters = await openFilters(page);
     // A click, not `check()`: ticking a filter navigates, and the re-rendered page replaces the element
-    // before Playwright can read its new state back.
-    await filters.getByRole("checkbox", { name: /^Apple/ }).click();
-
-    await expect(page).toHaveURL(/brand=apple/);
+    // before Playwright can read its new state back. The click is retried because one that lands before
+    // React hydrates is simply lost — as it would be for a real customer.
+    await expect(async () => {
+      await filters.getByRole("checkbox", { name: /^Apple/ }).click();
+      await expect(page).toHaveURL(/brand=apple/, { timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
     await expect(page.getByRole("button", { name: /Apple/ }).first()).toBeVisible();
 
     const cards = page.getByTestId("product-card");

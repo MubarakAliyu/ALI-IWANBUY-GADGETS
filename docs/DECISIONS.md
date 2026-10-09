@@ -68,3 +68,30 @@ catalogue never downloads a query cache to answer three keystrokes.
 **OPEN-004 · Category photographs.** The six category tiles use the approved lifestyle photographs, which are
 only an approximate match for Tablets, Laptops and Smartwatches. The owner should supply one photograph per
 category, or the tiles should fall back to a generated image as the products do.
+
+**ADR-013 · 9 Oct 2026 · TanStack Query returns to the root layout (revises ADR-012).** Batch 2 puts a
+wishlist heart on every product card and a session-aware menu in the header, both of which overview §6.3
+assigns to TanStack Query. The query client therefore lives in the root layout again, with the session as its
+first query. It costs the catalogue pages about 20 kB of first-load JavaScript (243 → 263 kB on the home
+page), which is recorded against the performance follow-up in `PROGRESS.md`. Search suggestions stayed on a
+plain debounced `fetch`, because the overview never put them on the cache.
+
+**ADR-014 · 9 Oct 2026 · The auth rate limit is production-strength only.** Overview §6.4 specifies five
+sign-in or registration attempts per minute per IP, and production does exactly that. In development the limit
+is 100, because the developer, the browser and the whole end-to-end suite — which registers a fresh customer
+per test — all arrive from one address, and a shared budget of five made the suite fail for a reason unrelated
+to the code. The per-account lockout (eight failures, thirty minutes) is unchanged in every environment, and it
+is the control that actually stops a patient guesser.
+
+**ADR-015 · 9 Oct 2026 · Signing in is a full page navigation.** After a successful sign-in or registration the
+client calls `window.location.assign(next)` rather than `router.replace(next)`. While the visitor was signed
+out, Next may have prefetched the page they were heading for and cached the middleware's redirect back to the
+sign-in form; replaying that cached answer bounced a freshly signed-in customer straight back to sign in. A
+full navigation also re-renders every server component as the signed-in customer, which is what that moment
+means.
+
+**ADR-016 · 9 Oct 2026 · The browser cart is hydrated from the root layout.** `CartHydrator` was mounted in the
+storefront layout, so the sign-in and registration pages — which live in their own route group — never read the
+stored cart. The merge that runs at sign-in therefore sent an empty cart and silently emptied it. The cart
+belongs to the browser rather than to a route group, so it is now read back in the root layout, where every
+page has it.
