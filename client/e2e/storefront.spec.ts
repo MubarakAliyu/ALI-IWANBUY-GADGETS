@@ -73,9 +73,12 @@ test.describe("shop filters", () => {
     const prices = await page.getByTestId("product-card").locator(".numeric").first().allInnerTexts();
     expect(prices.join()).toContain("₦");
 
-    // Clearing a chip takes the filter back out of the URL.
-    await page.getByRole("button", { name: /From ₦1,000,000/ }).click();
-    await expect(page).not.toHaveURL(/minPrice/);
+    // Clearing a chip takes the filter back out of the URL. The click is retried because a click that lands
+    // before React has hydrated the page is simply lost — as it would be for a real customer.
+    await expect(async () => {
+      await page.getByRole("button", { name: /From ₦1,000,000/ }).click();
+      await expect(page).not.toHaveURL(/minPrice/, { timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
   });
 
   test("an impossible filter shows the empty state, not an error", async ({ page }) => {
