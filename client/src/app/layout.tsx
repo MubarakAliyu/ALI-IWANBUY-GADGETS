@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import { SITE } from "@/lib/site";
+import { THEME_COLOUR } from "@/styles/tokens";
 import { montserrat } from "./fonts";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#156FBF",
+  themeColor: THEME_COLOUR,
   width: "device-width",
   initialScale: 1,
 };

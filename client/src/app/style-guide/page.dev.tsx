@@ -5,6 +5,7 @@ import { ORDER_STATUS } from "@aib/shared";
 import { HeartIcon, SearchIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/brand/logo";
+import { BRAND_COLOURS } from "@/styles/tokens";
 import { logoManifest, type LogoVariant } from "@/components/brand/logo-manifest";
 import { Container } from "@/components/shared/container";
 import { Badge } from "@/components/ui/badge";
@@ -63,19 +64,7 @@ const TYPE_SCALE = [
   ["Caption 12 muted", "text-caption text-text-muted"],
 ] as const;
 
-const COLOURS = [
-  ["brand-primary", "#156FBF", "bg-brand-primary"],
-  ["brand-navy", "#1E2A35", "bg-brand-navy"],
-  ["brand-grey", "#88939E", "bg-brand-grey"],
-  ["text-muted", "#646F7A", "bg-text-muted"],
-  ["primary-50", "#EAF2FA", "bg-primary-50"],
-  ["primary-700", "#0D4475", "bg-primary-700"],
-  ["grey-100", "#F1F4F6", "bg-grey-100"],
-  ["grey-200", "#DFE4E8", "bg-grey-200"],
-  ["success", "#16A34A", "bg-success"],
-  ["warning", "#D97706", "bg-warning"],
-  ["danger", "#DC2626", "bg-danger"],
-] as const;
+const COLOURS = Object.entries(BRAND_COLOURS).map(([name, hex]) => ({ name, hex }));
 
 export default function StyleGuidePage() {
   const [qty, setQty] = useState(2);
@@ -117,11 +106,14 @@ export default function StyleGuidePage() {
 
         <Section title="Colour">
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-            {COLOURS.map(([name, hex, className]) => (
-              <li key={name} className="grid gap-1">
-                <span className={`block h-14 rounded-md border border-grey-200 ${className}`} />
-                <span className="text-caption font-medium">{name}</span>
-                <span className="text-caption numeric text-text-muted">{hex}</span>
+            {COLOURS.map((colour) => (
+              <li key={colour.name} className="grid gap-1">
+                <span
+                  className="block h-14 rounded-md border border-grey-200"
+                  style={{ backgroundColor: colour.hex }}
+                />
+                <span className="text-caption font-medium">{colour.name}</span>
+                <span className="text-caption numeric text-text-muted">{colour.hex}</span>
               </li>
             ))}
           </ul>
