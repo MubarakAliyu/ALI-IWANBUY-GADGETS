@@ -1,0 +1,11 @@
+node_modules
+.next
+dist
+pnpm-lock.yaml
+brand
+client/public
+server/uploads
+server/.local
+playwright-report
+test-results
+docs/DEMO-ACCOUNTS.md

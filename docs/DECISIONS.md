@@ -37,3 +37,34 @@ README and pitch state this explicitly.
 invoice PDFs go to Cloudinary in production (Render's disk is ephemeral) via the existing `storage` interface;
 local disk in development. Email via any SMTP provider (e.g. Brevo free tier) — if no SMTP credentials are
 available at deploy time, the production mailer logs and stores the email so invoices remain downloadable.
+
+**ADR-009 · 9 Oct 2026 · Three denormalised fields on `Product` (Batch 1).** `priceFromKobo`,
+`compareAtPriceKobo` and `totalStock` are recomputed from the variants in a pre-save hook, and `brandName` is
+copied from the brand. Without them every listing query would need an aggregation over the variant subdocuments
+to filter by price or stock and to sort, and search could not match a brand without a join. Consequence: a brand
+rename has to rewrite `brandName` on its products — Batch 3's brand editor must do this, and the batch prompt
+carries the note.
+
+**ADR-010 · 9 Oct 2026 · Substring search instead of a MongoDB text index.** The overview §7 lists a text index
+on name/brand/tags, but S-1 requires suggestions from the second character typed, and `$text` matches whole
+stemmed words only — "ip" would return nothing for "iPhone". One search behaviour is used everywhere instead: a
+case-insensitive substring match on name, brand name and tags, with names that start with the query ranked
+first. At this catalogue's size (tens of products, not millions) it is fast and, unlike `$text`, it gives the
+same results in the suggestion list and on the results page. Revisit if the catalogue passes a few thousand
+products, where an Atlas Search index would be the replacement.
+
+**ADR-011 · 9 Oct 2026 · Catalogue pages are rendered statically; cookies are forwarded only when needed.**
+Reading the incoming request headers makes a Next.js route dynamic. The API client therefore forwards the
+session cookie only when a call is told to (`forwardCookies`), which Batch 2's account and checkout pages will
+set. As a result the home page, the written pages and all 43 product pages are prerendered with a 60-second
+revalidate, which is what overview §6.3 asks for. `/shop`, `/search` and `/category/[slug]` read the URL's query
+string and are rendered per request by nature.
+
+**ADR-012 · 9 Oct 2026 · TanStack Query is mounted where it is used, not in the root layout.** Overview §6.3
+assigns it to the cart, checkout and admin tables, so the query client is created inside the cart view. The
+header's search suggestions use a debounced `fetch` with an abort signal instead, so a customer browsing the
+catalogue never downloads a query cache to answer three keystrokes.
+
+**OPEN-004 · Category photographs.** The six category tiles use the approved lifestyle photographs, which are
+only an approximate match for Tablets, Laptops and Smartwatches. The owner should supply one photograph per
+category, or the tiles should fall back to a generated image as the products do.

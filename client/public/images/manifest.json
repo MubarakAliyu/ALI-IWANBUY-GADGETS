@@ -1,0 +1,189 @@
+[
+  {
+    "name": "android-phones",
+    "source": "moscow-russia-august-30-2021-samsung-officially-launches-latest-flagship-smartphone-samsung-galaxy-flip-3-with-foldable-display.jpg",
+    "originalBytes": 4839308,
+    "sizes": {
+      "800": {
+        "file": "android-phones-800.webp",
+        "bytes": 19892,
+        "height": 516
+      },
+      "1600": {
+        "file": "android-phones.webp",
+        "bytes": 53340,
+        "height": 1032
+      }
+    }
+  },
+  {
+    "name": "apple-devices",
+    "source": "saratov-russia-10-june-2021-macbook-computer-iphone-airpods-watch-black-table-created-by-apple-inc.jpg",
+    "originalBytes": 2367283,
+    "sizes": {
+      "800": {
+        "file": "apple-devices-800.webp",
+        "bytes": 16990,
+        "height": 1200
+      },
+      "1600": {
+        "file": "apple-devices.webp",
+        "bytes": 47368,
+        "height": 2400
+      }
+    }
+  },
+  {
+    "name": "earbuds",
+    "source": "wireless-earbuds-with-neon-cyberpunk-style-lighting.jpg",
+    "originalBytes": 18095072,
+    "sizes": {
+      "800": {
+        "file": "earbuds-800.webp",
+        "bytes": 20052,
+        "height": 1200
+      },
+      "1600": {
+        "file": "earbuds.webp",
+        "bytes": 56220,
+        "height": 2400
+      }
+    }
+  },
+  {
+    "name": "gadgets",
+    "source": "minimalist-display-modern-gadgets-including-headphone-speaker-smartphone.jpg",
+    "originalBytes": 7739927,
+    "sizes": {
+      "800": {
+        "file": "gadgets-800.webp",
+        "bytes": 40408,
+        "height": 800
+      },
+      "1600": {
+        "file": "gadgets.webp",
+        "bytes": 96906,
+        "height": 1600
+      }
+    }
+  },
+  {
+    "name": "headphones",
+    "source": "headphones-with-minimalist-monochrome-background.jpg",
+    "originalBytes": 22424426,
+    "sizes": {
+      "800": {
+        "file": "headphones-800.webp",
+        "bytes": 9818,
+        "height": 533
+      },
+      "1600": {
+        "file": "headphones.webp",
+        "bytes": 67644,
+        "height": 1067
+      }
+    }
+  },
+  {
+    "name": "phone-case",
+    "source": "white-phone-case-back-view-mock-up-gray-background-generate-by-ai.jpg",
+    "originalBytes": 2464783,
+    "sizes": {
+      "800": {
+        "file": "phone-case-800.webp",
+        "bytes": 15248,
+        "height": 450
+      },
+      "1600": {
+        "file": "phone-case.webp",
+        "bytes": 34214,
+        "height": 900
+      }
+    }
+  },
+  {
+    "name": "phone-case-alt",
+    "source": "white-phone-case-back-view-mock-up-gray-background-generate-by-ai (1).jpg",
+    "originalBytes": 2340027,
+    "sizes": {
+      "800": {
+        "file": "phone-case-alt-800.webp",
+        "bytes": 14418,
+        "height": 450
+      },
+      "1600": {
+        "file": "phone-case-alt.webp",
+        "bytes": 31380,
+        "height": 900
+      }
+    }
+  },
+  {
+    "name": "phones",
+    "source": "three-different-colored-cell-phones-are-lined-up-against-white-background.jpg",
+    "originalBytes": 1815264,
+    "sizes": {
+      "800": {
+        "file": "phones-800.webp",
+        "bytes": 10996,
+        "height": 800
+      },
+      "1600": {
+        "file": "phones.webp",
+        "bytes": 27576,
+        "height": 1600
+      }
+    }
+  },
+  {
+    "name": "product-podium",
+    "source": "view-electronic-product-balancing-podium.jpg",
+    "originalBytes": 14714489,
+    "sizes": {
+      "800": {
+        "file": "product-podium-800.webp",
+        "bytes": 16642,
+        "height": 1200
+      },
+      "1600": {
+        "file": "product-podium.webp",
+        "bytes": 47562,
+        "height": 2400
+      }
+    }
+  },
+  {
+    "name": "tech-futuristic",
+    "source": "technology-concept-with-futuristic-element.jpg",
+    "originalBytes": 5016543,
+    "sizes": {
+      "800": {
+        "file": "tech-futuristic-800.webp",
+        "bytes": 21112,
+        "height": 1169
+      },
+      "1600": {
+        "file": "tech-futuristic.webp",
+        "bytes": 54824,
+        "height": 2338
+      }
+    }
+  },
+  {
+    "name": "tech-nature",
+    "source": "tech-device-with-nature-background.jpg",
+    "originalBytes": 7893311,
+    "sizes": {
+      "800": {
+        "file": "tech-nature-800.webp",
+        "bytes": 17778,
+        "height": 800
+      },
+      "1600": {
+        "file": "tech-nature.webp",
+        "bytes": 46264,
+        "height": 1600
+      }
+    }
+  }
+]

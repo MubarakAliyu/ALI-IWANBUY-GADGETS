@@ -1,4 +1,5 @@
 # ALI_IWANBUY Gadgets — BATCH 3 BUILD PROMPT
+
 ### Admin dashboard, deployment & pitch — the owner runs the business from here, live
 
 > Send only once **Batch 2 is committed and green**. Re-read overview §3.2, §4.6 (admin shell), §6.5 (PIN), §7
@@ -11,6 +12,7 @@
 ---
 
 ## PART A — Admin auth, roles, PIN
+
 - [ ] `Admin` model; seed adds OWNER, MANAGER, STAFF (OWNER + MANAGER with PINs), plus 6 customers and ~60
       historical orders across 60 days in every status with matching payments, invoices and audit rows (extend
       the Batch 1 seed; dates in Africa/Lagos). Demo credentials → console + `docs/DEMO-ACCOUNTS.md`.
@@ -23,6 +25,7 @@
 - [ ] `/admin/login` page (navy brand panel + form). Next middleware guards `/admin/(panel)`.
 
 ## PART B — Admin shell
+
 - [ ] Navy 260 px sidebar (horizontal white lockup at top, mark only when collapsed to 72 px rail; collapse state
       remembered in localStorage), items filtered by role, active item = primary left bar; white top bar with
       global search (order number → order, email → customer, text → products), bell with count of orders
@@ -31,6 +34,7 @@
       empty state, row actions menu, **Export CSV** (server endpoint with the same filters).
 
 ## PART C — Overview & financial KPIs (A-3)
+
 - [ ] `GET /admin/dashboard?period=` via aggregation pipelines (Africa/Lagos day boundaries): revenue (sum of
       CONFIRMED payments minus refunds), orders, AOV, awaiting confirmation (count + ₦), refunds, new customers,
       units sold, low-stock variants — each with previous-period delta; series revenue-by-day; orders by status;
@@ -41,6 +45,7 @@
       brand colours only.
 
 ## PART D — Orders, payments, invoices
+
 - [ ] **Orders** (A-4) list + detail. Actions call services that use `order-lifecycle.ts`:
       `advanceStatus` (legal next states only, optional note, customer email on customer-visible changes),
       `cancel` (reason; PIN if paid; restock; transaction), `refund` (PIN, reason, creates a negative Payment of
@@ -57,11 +62,12 @@
       SVG to PNG once with sharp at build/seed), Montserrat TTF from `brand/fonts/ttf/` embedded, navy header
       band, company block (registered address, RC, TIN, phone), "INVOICE" + number + dates, bill-to, items table
       (name, variant, SKU, qty, unit, total), subtotal/delivery/total, payment status + method + reference, bank
-      details, footer note + *Clean. Modern. Reliable.* Stored under `server/.local/invoices/`. List, view/download,
+      details, footer note + _Clean. Modern. Reliable._ Stored under `server/.local/invoices/`. List, view/download,
       **Send to customer** (email with PDF attached, records `sentAt`, status `SENT`), resend, void (OWNER,
       reason). Customer `GET /orders/:number/invoice.pdf` now works and the Download button appears in My Orders.
 
 ## PART E — Catalogue management
+
 - [ ] **Products** (A-5): list (table and grid toggle), filters, bulk activate/archive; create/edit page in
       sections (Details · Media · Variants · Organisation · Visibility) with sticky save bar and unsaved-changes
       guard; image upload (multer + sharp → 400/800/1400 WebP, max 6, drag reorder, primary first, alt text);
@@ -71,6 +77,7 @@
       (up/down buttons), image/logo upload, archive guard.
 
 ## PART F — People, settings, audit
+
 - [ ] **Customers** (A-9): list + detail; spend totals hidden from STAFF on the server; suspend/reactivate.
 - [ ] **Admin users** (A-10, OWNER only): create (temporary password shown once in a copyable dialog + invite
       email), edit role, suspend/reactivate, reset password, reset PIN; last-OWNER and self-suspend guards.
@@ -84,6 +91,7 @@
       router's mutating endpoints with a seeded request and asserts an audit row was written).
 
 ## PART G — Verification, docs, deploy readiness
+
 - [ ] Server tests: permission matrix (each role × each admin endpoint group), PIN (trivial rejected, wrong PIN,
       lockout, reset by OWNER), confirm-payment happy path → Payment + Invoice + audit + order state, wrong
       amount refused, double confirmation refused (idempotent 409), refund restocks, last-OWNER guard, dashboard
@@ -99,9 +107,11 @@
 - [ ] Gates + full local E2E green. Commit on `batch/03-admin`.
 
 ## PART H — Deployment (Lab Phase 3)
+
 Goal: the site runs in production and is proven there, not just on this laptop.
 
 **H.1 Production readiness in code**
+
 - [ ] `storage` interface gains a **Cloudinary** provider (`STORAGE_PROVIDER=cloudinary`, `CLOUDINARY_URL`) used for
       product images and invoice PDFs in production; local disk stays the dev default. Seed in production mode
       uploads its placeholder images through the same interface.
@@ -118,6 +128,7 @@ Goal: the site runs in production and is proven there, not just on this laptop.
 
 **H.2 Set up the hosting** (Claude Code prepares everything; the account sign-ups and secret values are done by
 the student — never paste secrets into the repo or the chat)
+
 - [ ] MongoDB Atlas M0 cluster, database user, network access, connection string → `MONGODB_URI`.
 - [ ] Render web service from the GitHub repo using `render.yaml`; env vars from `server/.env.example`.
 - [ ] Vercel project (root `client/`), `API_ORIGIN` = Render URL; production domain recorded.
@@ -128,6 +139,7 @@ the student — never paste secrets into the repo or the chat)
       re-seed demo data, known limits (Render cold start ~30–50 s on free tier).
 
 **H.3 Test it thoroughly in production**
+
 - [ ] Production smoke checklist run by hand and recorded with ✅/❌ and notes in `docs/DEPLOYMENT.md` §
       "Production test report": health; home, shop, filters, product, cart on phone and desktop; register;
       checkout (bank transfer); "I've paid"; admin login; confirm payment with PIN; invoice PDF downloads;
@@ -138,19 +150,10 @@ the student — never paste secrets into the repo or the chat)
 - [ ] Any production-only defect found is fixed, redeployed and re-tested; the report shows before/after.
 
 ## PART I — Pitch pack (Lab Phase 4)
-- [ ] `docs/PITCH.md` — a 7–10 minute talk track and slide-by-slide outline:
-      1. Title — ALI_IWANBUY Gadgets · *Clean. Modern. Reliable.* · live URL
-      2. **Purpose & significance** — a real Birnin Kebbi phone shop selling through WhatsApp flyers; why an online
-         store matters for it and for small Nigerian retailers
-      3. **Objectives** — the goals G1–G6 from the overview, in plain language
-      4. The solution — storefront + admin, MERN architecture diagram (React/Next.js · Express · MongoDB)
-      5. Live demo (scripted, ≤ 4 min) — customer journey, then owner journey with PIN confirmation and invoice
-      6. Engineering highlights — atomic stock (the last-phone race test), PIN-confirmed payments, append-only
-         audit, integer-kobo money, role permissions enforced on the server
-      7. **Outcomes** — what was delivered, test counts, Lighthouse scores, production test report summary
-      8. **Findings / lessons learned** — what was hard, what changed, what I would do differently
-      9. Roadmap — IMS stock sync, Paystack, WhatsApp notifications
-      10. Thank you / Q&A — contacts, repo link
+
+- [ ] `docs/PITCH.md` — a 7–10 minute talk track and slide-by-slide outline: 1. Title — ALI_IWANBUY Gadgets · _Clean. Modern. Reliable._ · live URL 2. **Purpose & significance** — a real Birnin Kebbi phone shop selling through WhatsApp flyers; why an online
+      store matters for it and for small Nigerian retailers 3. **Objectives** — the goals G1–G6 from the overview, in plain language 4. The solution — storefront + admin, MERN architecture diagram (React/Next.js · Express · MongoDB) 5. Live demo (scripted, ≤ 4 min) — customer journey, then owner journey with PIN confirmation and invoice 6. Engineering highlights — atomic stock (the last-phone race test), PIN-confirmed payments, append-only
+      audit, integer-kobo money, role permissions enforced on the server 7. **Outcomes** — what was delivered, test counts, Lighthouse scores, production test report summary 8. **Findings / lessons learned** — what was hard, what changed, what I would do differently 9. Roadmap — IMS stock sync, Paystack, WhatsApp notifications 10. Thank you / Q&A — contacts, repo link
 - [ ] `docs/DEMO-SCRIPT.md` — click-by-click demo with the demo accounts and a fallback (local run) if the free
       tier is cold.
 - [ ] `docs/screenshots/` — Playwright-captured PNGs at desktop and mobile of: home, shop with filters, product,
@@ -160,9 +163,10 @@ the student — never paste secrets into the repo or the chat)
 - [ ] Final: merge all batches to `main`, tag `v1.0.0`, update `PROGRESS.md`.
 
 ## Acceptance criteria
+
 - AC3.1 Each role sees and can do exactly what overview §3.2 says — proven by tests, not just hidden UI.
 - AC3.2 No payment becomes PAID without a named admin's correct PIN; every confirmation creates a Payment, an
-      Invoice and an audit row atomically.
+  Invoice and an audit row atomically.
 - AC3.3 KPIs match a hand-computed fixture for at least two periods.
 - AC3.4 Invoices are branded PDFs that can be downloaded by admin and customer and emailed to the customer.
 - AC3.5 Products, variants, images and stock are fully manageable from admin and reflect on the storefront.
@@ -170,9 +174,9 @@ the student — never paste secrets into the repo or the chat)
 - AC3.7 The audit trail records every admin mutation and security event and cannot be altered.
 - AC3.8 Gates + E2E green; README lets a stranger run the project in under 10 minutes.
 - AC3.9 **Live**: the storefront and admin run on the production URL; the production test report is complete with
-      every row ✅ (or a fixed-and-retested note); Playwright passes against the live URL.
+  every row ✅ (or a fixed-and-retested note); Playwright passes against the live URL.
 - AC3.10 **Pitch pack**: `PITCH.md`, `DEMO-SCRIPT.md` and screenshots exist and cover purpose & significance,
-      objectives, outcomes and findings; every `LAB-PHASES.md` row is ticked.
+  objectives, outcomes and findings; every `LAB-PHASES.md` row is ticked.
 
 **Final report**: what was built per batch, live URLs, run instructions, demo accounts, test totals, Lighthouse,
 production test summary, open client items (real bank details, real product photos, SMTP credentials, final logo

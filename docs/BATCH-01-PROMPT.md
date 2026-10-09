@@ -1,4 +1,5 @@
 # ALI_IWANBUY Gadgets — BATCH 1 BUILD PROMPT
+
 ### Foundation & Storefront — the shop window
 
 > First batch. Read `CLAUDE.md` and `docs/PROJECT-OVERVIEW.md` in full before starting.
@@ -11,12 +12,14 @@
 ---
 
 ## PART 0 — Ground rules for this batch
+
 1. Work only inside `ALI_IWANBUY-STORE/`. The IMS at `../ALI_IWANBUY-IMS/` is **read-only reference**.
 2. `git init` in `ALI_IWANBUY-STORE/` (its own repository), first commit on `main` = docs + brand, then work on
    `batch/01-foundation-storefront`.
 3. Node 22, pnpm 10. If pnpm is missing: `corepack enable pnpm` or `npm i -g pnpm@10`.
 
 ## PART A — Monorepo & tooling
+
 - [ ] Root `package.json` + `pnpm-workspace.yaml` with workspaces `client`, `server`, `shared`.
 - [ ] Root scripts: `dev` (runs client + server concurrently with labelled output), `build`, `typecheck`, `lint`,
       `test`, `format`, `format:check`, `seed`, `db:local`, `test:e2e`.
@@ -32,6 +35,7 @@
       `PAYMENT_STATUS` enums (used from Batch 2).
 
 ## PART B — Server foundation (Express + MongoDB)
+
 - [ ] `server/src/app.ts` (express app factory, testable) and `index.ts` (connect + listen). Middleware: helmet,
       cors (`CLIENT_ORIGIN`, credentials), cookie-parser, json limit 1 MB, pino-http, mongo key sanitiser,
       `/uploads` static, `/api/v1` router, 404 + central error handler (`AppError` with code/status; zod errors →
@@ -59,6 +63,7 @@
       numbering uniqueness under concurrency (50 parallel increments → 50 distinct numbers).
 
 ## PART C — Client foundation & design system
+
 - [ ] Next.js 15.5 App Router, React 19, TS, Tailwind v4. `next.config.ts` rewrites `/api/:path*` and
       `/uploads/:path*` to `API_ORIGIN`; `images.remotePatterns` for the API origin.
 - [ ] `globals.css`: copy the `@theme` block from `brand/reference/ims-globals.css` verbatim, plus the order
@@ -75,6 +80,7 @@
 - [ ] A dev-only `/style-guide` page showing every primitive and state (excluded from production build output).
 
 ## PART D — Storefront screens (overview §9)
+
 - [ ] **Layout**: navy announcement bar; header (logo, search with suggestions dropdown — keyboard navigable,
       category mega-menu / mobile drawer, wishlist icon (links to `/login?next=/account/wishlist` for now), cart
       icon with live count opening the **mini-cart drawer**, account icon → dropdown with "Sign in" and
@@ -102,6 +108,7 @@
 - [ ] Mobile-first: check 360, 768, 1280, 1920 widths. No horizontal scroll anywhere.
 
 ## PART E — Verification
+
 - [ ] Client unit tests: money formatting, cart store (add, merge same line, cap at stock, remove, persist),
       filter ↔ URL serialisation.
 - [ ] Playwright smoke (desktop + Pixel 7 projects): home renders hero + featured; filter by brand and price
@@ -114,12 +121,13 @@
       `pnpm seed`, `pnpm dev`).
 
 ## Acceptance criteria
+
 - AC1.1 `pnpm i && pnpm db:local & pnpm seed && pnpm dev` gives a working storefront at :3000 with ~40 products.
 - AC1.2 Every filter, sort and page is reflected in and restorable from the URL.
 - AC1.3 Variant change updates price, stock state and the add-to-cart target; out-of-stock cannot be added.
 - AC1.4 Cart survives a reload; quantities never exceed stock; `/cart/validate` corrections are shown.
 - AC1.5 Only brand tokens and Montserrat are used (grep finds no hex colours outside `globals.css`/tokens and no
-      other font).
+  other font).
 - AC1.6 Gates green; E2E smoke + axe green on both viewports.
 
 **Report** at the end: what was built, how to run it, test counts, Lighthouse numbers, decisions taken, and

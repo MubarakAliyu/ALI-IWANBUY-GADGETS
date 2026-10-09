@@ -16,7 +16,6 @@ dist/
 # runtime data
 server/uploads/
 server/.local/
-client/public/images/
 
 # test artefacts
 playwright-report/

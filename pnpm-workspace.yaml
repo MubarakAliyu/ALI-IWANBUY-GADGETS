@@ -1,0 +1,10 @@
+packages:
+  - shared
+  - server
+  - client
+
+onlyBuiltDependencies:
+  - sharp
+  - esbuild
+  - unrs-resolver
+  - mongodb-memory-server

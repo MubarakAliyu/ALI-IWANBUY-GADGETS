@@ -1,0 +1,43 @@
+{
+  "name": "ali-iwanbuy-store",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ALI_IWANBUY Gadgets — MERN storefront and admin dashboard for ALI_IWANBUY INTEGRATED SERVICE LTD",
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @aib/shared build && concurrently -n server,client -c blue,magenta \"pnpm --filter @aib/server dev\" \"pnpm --filter @aib/client dev\"",
+    "build": "pnpm --filter @aib/shared build && pnpm --filter @aib/server build && pnpm --filter @aib/client build",
+    "typecheck": "pnpm --filter @aib/shared build && pnpm -r --sequential typecheck",
+    "lint": "eslint . --max-warnings=0",
+    "test": "pnpm --filter @aib/shared build && pnpm -r --sequential test",
+    "test:e2e": "pnpm --filter @aib/client test:e2e",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "seed": "pnpm --filter @aib/server seed",
+    "db:local": "pnpm --filter @aib/server db:local",
+    "images:prepare": "node scripts/prepare-images.mjs",
+    "lighthouse": "node scripts/lighthouse.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@next/eslint-plugin-next": "15.5.19",
+    "chrome-launcher": "^1.2.2",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.0",
+    "globals": "^16.5.0",
+    "lighthouse": "^12.8.2",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "sharp": "^0.35.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0"
+  }
+}

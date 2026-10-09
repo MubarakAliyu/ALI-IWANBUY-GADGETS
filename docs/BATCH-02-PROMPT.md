@@ -1,4 +1,5 @@
 # ALI_IWANBUY Gadgets — BATCH 2 BUILD PROMPT
+
 ### Customer accounts, wishlist & checkout — the moment a browser becomes a buyer
 
 > Send only once **Batch 1 is committed and green**. Re-read overview §3.1, §6.4–6.7, §7 (Customer, Cart, Order,
@@ -11,6 +12,7 @@
 ---
 
 ## PART A — Customer authentication
+
 - [ ] `Customer` model (overview §7). Email lower-cased + trimmed, unique index; **immutable**: the schema
       marks it `immutable: true` and `PATCH /me/profile` rejects an `email` key with 400 `EMAIL_IMMUTABLE`.
 - [ ] `POST /auth/register` (firstName, lastName, email, password, confirmPassword, acceptTerms) → creates,
@@ -29,6 +31,7 @@
       **Wishlist**, **Sign out**. Signed out: Sign in / Create account.
 
 ## PART B — Account settings (S-12)
+
 - [ ] `/account` layout with side nav (desktop) / tabs (mobile): Settings, My orders, Wishlist.
 - [ ] **Profile** tab: first name, last name, phone (Nigerian format validation, normalised to `+234…`);
       **email displayed read-only with a lock icon and helper "Your email can't be changed."**
@@ -39,6 +42,7 @@
 - [ ] Every change writes an audit row (`actorType: CUSTOMER`).
 
 ## PART C — Wishlist & server cart
+
 - [ ] `GET /me/wishlist`, `POST|DELETE /me/wishlist/:productId`. Heart toggles on cards and detail are
       optimistic (TanStack Query), header shows count. Signed-out click → `/login?next=<current>` and the item is
       added after sign-in. `/account/wishlist` grid with "Move to cart" and remove.
@@ -47,18 +51,13 @@
       while signed in.
 
 ## PART D — Checkout & orders (S-9, S-10, overview §8)
+
 - [ ] Models: `Order`, `Payment` (Payment documents are created in Batch 3, the model exists now). Counter-based
       `AIB-ORD-YYYYMM-NNNN`.
-- [ ] `order.service.placeOrder(customerId, input)` in **one transaction**:
-      1. load cart lines from the request (product/variant/qty only — **client prices are ignored**);
-      2. re-read products, reject inactive/archived;
-      3. for each line `updateOne({ _id, "variants._id": vid, "variants.stock": { $gte: qty } }, { $inc: … })`
-         using the positional/arrayFilters form; if `modifiedCount === 0` abort with 409 `OUT_OF_STOCK` naming
-         the item and available qty;
-      4. compute subtotal, delivery fee from Settings (`PICKUP` = 0; free-delivery threshold respected), total;
-      5. snapshot items + address; status `PENDING_PAYMENT` for bank transfer, `PROCESSING` (paymentStatus
-         `UNPAID`) for pay on delivery/pickup; `statusHistory` first entry;
-      6. clear the server cart; audit `ORDER_PLACED`; after commit send "order placed" email.
+- [ ] `order.service.placeOrder(customerId, input)` in **one transaction**: 1. load cart lines from the request (product/variant/qty only — **client prices are ignored**); 2. re-read products, reject inactive/archived; 3. for each line `updateOne({ _id, "variants._id": vid, "variants.stock": { $gte: qty } }, { $inc: … })`
+      using the positional/arrayFilters form; if `modifiedCount === 0` abort with 409 `OUT_OF_STOCK` naming
+      the item and available qty; 4. compute subtotal, delivery fee from Settings (`PICKUP` = 0; free-delivery threshold respected), total; 5. snapshot items + address; status `PENDING_PAYMENT` for bank transfer, `PROCESSING` (paymentStatus
+      `UNPAID`) for pay on delivery/pickup; `statusHistory` first entry; 6. clear the server cart; audit `ORDER_PLACED`; after commit send "order placed" email.
 - [ ] Customer order routes (overview §11): list (filter by status, paginated), detail by number (own orders
       only — another customer's number → 404), `transfer-made` (optional reference, only from
       `PENDING_PAYMENT` → `AWAITING_CONFIRMATION`), `cancel` (only `PENDING_PAYMENT`/`AWAITING_CONFIRMATION`,
@@ -83,6 +82,7 @@
       (wired in Batch 3 — the route `GET /orders/:number/invoice.pdf` returns 404 until then).
 
 ## PART E — Verification
+
 - [ ] Server tests: register/login/logout, duplicate email, **email immutable** (PATCH with email → 400; direct
       model update → rejected), lockout after 8 failures, password change invalidates old token, address CRUD +
       limit, wishlist, cart merge caps at stock, **place order happy path** (stock decremented, totals right,
@@ -96,6 +96,7 @@
 - [ ] Gates green. Commit on `batch/02-accounts-checkout`. Update `PROGRESS.md` + README.
 
 ## Acceptance criteria
+
 - AC2.1 A new customer registers in one screen and is signed in; their email can never be changed by any route.
 - AC2.2 Guest cart survives sign-in (merged); wishlist works from cards, detail and the account page.
 - AC2.3 Checkout creates exactly one order atomically; stock can never go negative; client prices are ignored.
