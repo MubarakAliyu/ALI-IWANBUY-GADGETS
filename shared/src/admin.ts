@@ -94,17 +94,30 @@ export function isTrivialPin(pin: string): boolean {
   return ["1234", "4321", "123456", "654321", "1212", "6969", "0007"].includes(pin);
 }
 
+/**
+ * **Entering** a PIN: the only thing worth checking before the request is that it is the right shape. The
+ * trivial-PIN rule belongs to choosing one — telling someone their existing PIN is "too easy to guess" when
+ * they have simply mistyped it would be nonsense, and the server is the one that decides whether it matches.
+ */
 export const pinSchema = z
   .string()
-  .regex(new RegExp(`^\\d{${PIN_MIN_LENGTH},${PIN_MAX_LENGTH}}$`), `Use ${PIN_MIN_LENGTH}–${PIN_MAX_LENGTH} digits`)
-  .refine((pin) => !isTrivialPin(pin), "That PIN is too easy to guess — choose another");
+  .regex(
+    new RegExp(`^\\d{${PIN_MIN_LENGTH},${PIN_MAX_LENGTH}}$`),
+    `Use ${PIN_MIN_LENGTH}–${PIN_MAX_LENGTH} digits`,
+  );
+
+/** **Choosing** a PIN: the same shape, and not one of the handful anyone would try first. */
+export const newPinSchema = pinSchema.refine(
+  (pin) => !isTrivialPin(pin),
+  "That PIN is too easy to guess — choose another",
+);
 
 export const setPinSchema = z
   .object({
     /** The current PIN, or the account password when setting one for the first time. */
     currentPin: z.string().optional(),
     password: z.string().optional(),
-    pin: pinSchema,
+    pin: newPinSchema,
     confirmPin: z.string(),
   })
   .refine((value) => value.pin === value.confirmPin, {
@@ -327,3 +340,103 @@ export const paymentTotalsSchema = z.object({
   count: z.number().int(),
 });
 export type PaymentTotals = z.infer<typeof paymentTotalsSchema>;
+
+// ── The dashboard (overview §10 A-3) ────────────────────────────────────────────────────────────────
+
+/**
+ * The periods the overview can be read over. `custom` takes `from` and `to`; the rest are named because they
+ * are what the owner actually asks for, and because a named period can be compared with the one before it
+ * without the client having to work out what that is.
+ */
+export const DASHBOARD_PERIODS = ["today", "7d", "30d", "month", "last-month", "custom"] as const;
+export type DashboardPeriod = (typeof DASHBOARD_PERIODS)[number];
+
+export const DASHBOARD_PERIOD_LABEL: Record<DashboardPeriod, string> = {
+  today: "Today",
+  "7d": "Last 7 days",
+  "30d": "Last 30 days",
+  month: "This month",
+  "last-month": "Last month",
+  custom: "Custom range",
+};
+
+export const dashboardQuerySchema = z.object({
+  period: z.enum(DASHBOARD_PERIODS).optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+});
+export type DashboardQuery = z.infer<typeof dashboardQuerySchema>;
+
+/**
+ * One tile. `previous` is the same measure over the period immediately before, so the client renders the
+ * delta rather than computing it — there is one definition of "up 12%" and it lives on the server.
+ */
+export const kpiSchema = z.object({
+  value: z.number(),
+  previous: z.number(),
+});
+export type Kpi = z.infer<typeof kpiSchema>;
+
+export const dashboardSchema = z.object({
+  period: z.object({
+    key: z.enum(DASHBOARD_PERIODS),
+    label: z.string(),
+    from: z.string(),
+    to: z.string(),
+    days: z.number().int(),
+  }),
+
+  /** Every role sees these: what has to be done today. */
+  operational: z.object({
+    awaitingConfirmation: kpiSchema,
+    toFulfil: kpiSchema,
+    unitsSold: kpiSchema,
+    lowStockVariants: kpiSchema,
+    ordersByStatus: z.array(z.object({ status: z.string(), count: z.number().int() })),
+    recentOrders: z.array(
+      z.object({
+        orderNumber: z.string(),
+        customerName: z.string(),
+        status: z.string(),
+        totalKobo: z.number().int(),
+        placedAt: z.string(),
+      }),
+    ),
+    lowStock: z.array(
+      z.object({
+        productId: z.string(),
+        name: z.string(),
+        slug: z.string(),
+        variantLabel: z.string(),
+        sku: z.string(),
+        stock: z.number().int(),
+      }),
+    ),
+  }),
+
+  /** OWNER and MANAGER only — the server omits this entirely for STAFF (§3.2). */
+  financial: z
+    .object({
+      revenueKobo: kpiSchema,
+      orders: kpiSchema,
+      averageOrderKobo: kpiSchema,
+      awaitingKobo: kpiSchema,
+      refundsKobo: kpiSchema,
+      newCustomers: kpiSchema,
+      revenueByDay: z.array(z.object({ day: z.string(), revenueKobo: z.number().int() })),
+      paymentMethods: z.array(
+        z.object({ method: z.string(), count: z.number().int(), amountKobo: z.number().int() }),
+      ),
+      topProducts: z.array(
+        z.object({
+          productId: z.string(),
+          name: z.string(),
+          slug: z.string(),
+          units: z.number().int(),
+          revenueKobo: z.number().int(),
+        }),
+      ),
+    })
+    .nullable(),
+});
+export type Dashboard = z.infer<typeof dashboardSchema>;

@@ -9,9 +9,23 @@ import { NextResponse, type NextRequest } from "next/server";
 const PROTECTED = [/^\/account(\/|$)/, /^\/checkout(\/|$)/];
 
 const CUSTOMER_COOKIE = "aib_c";
+const ADMIN_COOKIE = "aib_a";
+
+/** The dashboard pages that a signed-out admin may still reach. */
+const ADMIN_OPEN = [/^\/admin\/login$/];
 
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    if (ADMIN_OPEN.some((pattern) => pattern.test(pathname)) || request.cookies.has(ADMIN_COOKIE)) {
+      return NextResponse.next();
+    }
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin/login";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
 
   if (!PROTECTED.some((pattern) => pattern.test(pathname))) {
     return NextResponse.next();
@@ -27,5 +41,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/account/:path*", "/checkout/:path*"],
+  matcher: ["/account/:path*", "/checkout/:path*", "/admin/:path*"],
 };

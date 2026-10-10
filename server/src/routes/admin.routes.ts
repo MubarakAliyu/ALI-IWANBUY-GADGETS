@@ -6,6 +6,7 @@ import {
   adminProfileSchema,
   advanceOrderSchema,
   confirmPaymentSchema,
+  dashboardQuerySchema,
   invoiceQuerySchema,
   orderNoteSchema,
   paymentQuerySchema,
@@ -16,6 +17,7 @@ import {
 import { Router } from "express";
 import * as authController from "../controllers/admin-auth.controller.js";
 import * as orderController from "../controllers/admin-order.controller.js";
+import * as dashboardController from "../controllers/dashboard.controller.js";
 import { requirePermission } from "../lib/permissions.js";
 import { accountRateLimit, authRateLimit } from "../middleware/rate-limit.js";
 import { requireAdmin, requirePasswordChosen } from "../middleware/require-admin.js";
@@ -47,6 +49,17 @@ adminRouter.post("/me/pin", validateBody(setPinSchema), authController.setOwnPin
 adminRouter.use(requirePasswordChosen);
 
 adminRouter.patch("/me/profile", validateBody(adminProfileSchema), authController.updateProfile);
+
+// ── Overview (A-3) ──────────────────────────────────────────────────────────────────────────────────
+//
+// Every role may open the dashboard; what it contains depends on the role, decided inside the controller.
+
+adminRouter.get(
+  "/dashboard",
+  requirePermission("dashboard.operational"),
+  validateQuery(dashboardQuerySchema),
+  dashboardController.dashboard,
+);
 
 // ── Orders (A-4) ────────────────────────────────────────────────────────────────────────────────────
 //
