@@ -13,6 +13,7 @@
  */
 
 import {
+  formatNaira,
   multiplyKobo,
   type OrderStatus,
   type PaymentQuery,
@@ -179,7 +180,8 @@ export async function confirmPayment(
         action: "PAYMENT_CONFIRMED",
         entityType: "Order",
         entityId: order._id,
-        summary: `Confirmed ${input.amountKobo} kobo against ${order.orderNumber} (${paymentNumber}), invoice ${invoiceNumber}`,
+        // Naira, not kobo: this line is read by a person, and ₦1,560,000 is the figure they recognise.
+        summary: `Confirmed ${formatNaira(input.amountKobo)} against ${order.orderNumber} (${paymentNumber}), invoice ${invoiceNumber}`,
         before: { paymentStatus: existing.paymentStatus, status: existing.status },
         after: { paymentStatus: "PAID", status: nextStatus, payment: paymentNumber, invoice: invoiceNumber },
         session,
@@ -305,7 +307,7 @@ export async function refundOrder(
         action: "ORDER_REFUNDED",
         entityType: "Order",
         entityId: order._id,
-        summary: `Refunded ${order.orderNumber} and returned its stock`,
+        summary: `Refunded ${formatNaira(order.totalKobo)} on ${order.orderNumber} and returned its stock`,
         before: { status: existing.status, paymentStatus: existing.paymentStatus },
         after: { status: "REFUNDED", paymentStatus: "REFUNDED", reason: input.reason },
         session,

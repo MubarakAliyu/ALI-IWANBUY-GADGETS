@@ -7,19 +7,27 @@
  */
 
 import type {
+  Admin,
   AdminCancelOrderInput,
+  AdminCustomerQuery,
+  AdminCustomerRow,
   AdminOrderQuery,
   AdminOrderRow,
   AdminProductQuery,
   AdminProductRow,
   AdminProfileInput,
   AdminSession,
+  AdminRole,
   AdvanceOrderInput,
+  AuditQuery,
+  AuditRow,
   AwaitingPaymentRow,
   BrandInput,
   BulkProductStatusInput,
   CategoryInput,
   ConfirmPaymentFormInput,
+  CreateAdminInput,
+  CustomerStatusInput,
   Dashboard,
   DashboardQuery,
   InvoiceQuery,
@@ -34,6 +42,7 @@ import type {
   RefundOrderInput,
   SetPinInput,
   StockAdjustInput,
+  StoreSettingsInput,
   VoidInvoiceInput,
 } from "@aib/shared";
 import { apiRequest } from "@/lib/api";
@@ -206,7 +215,10 @@ export function invoicePdfHref(invoiceNumber: string): string {
   return `/api/v1/admin/invoices/${invoiceNumber}.pdf`;
 }
 
-export function exportHref(what: "orders" | "payments" | "invoices", query: object = {}): string {
+export function exportHref(
+  what: "orders" | "payments" | "invoices" | "customers" | "audit",
+  query: object = {},
+): string {
   return `/api/v1/admin/${what}/export${toQuery(query as Record<string, string | number | undefined>)}`;
 }
 
@@ -356,6 +368,65 @@ export async function uploadImage(
     throw new Error("error" in payload ? payload.error.message : "That image could not be uploaded.");
   }
   return payload as { url: string; width: number; height: number };
+}
+
+// ── People, settings and the audit trail ────────────────────────────────────────────────────────────
+
+export function listCustomers(query: AdminCustomerQuery = {}): Promise<Paginated<AdminCustomerRow>> {
+  return apiRequest<Paginated<AdminCustomerRow>>(`/admin/customers${toQuery(query)}`, PRIVATE);
+}
+
+export function setCustomerStatus(id: string, input: CustomerStatusInput): Promise<AdminCustomerRow> {
+  return apiRequest<AdminCustomerRow>(`/admin/customers/${id}/status`, { method: "POST", body: input });
+}
+
+export function listAdminUsers(): Promise<{ data: Admin[] }> {
+  return apiRequest<{ data: Admin[] }>("/admin/admins", PRIVATE);
+}
+
+export function createAdminUser(
+  input: CreateAdminInput,
+): Promise<{ admin: Admin; temporaryPassword: string }> {
+  return apiRequest<{ admin: Admin; temporaryPassword: string }>("/admin/admins", {
+    method: "POST",
+    body: input,
+  });
+}
+
+export function updateAdminUserRole(id: string, role: AdminRole): Promise<Admin> {
+  return apiRequest<Admin>(`/admin/admins/${id}/role`, { method: "PATCH", body: { role } });
+}
+
+export function setAdminUserStatus(id: string, status: "ACTIVE" | "SUSPENDED"): Promise<Admin> {
+  return apiRequest<Admin>(`/admin/admins/${id}/status`, { method: "PATCH", body: { status } });
+}
+
+export function resetAdminUserPassword(
+  id: string,
+  reason?: string,
+): Promise<{ admin: Admin; temporaryPassword: string }> {
+  return apiRequest<{ admin: Admin; temporaryPassword: string }>(`/admin/admins/${id}/reset-password`, {
+    method: "POST",
+    body: { ...(reason ? { reason } : {}) },
+  });
+}
+
+export type StoreSettings = StoreSettingsInput & { _id: string };
+
+export function getStoreSettings(): Promise<StoreSettings> {
+  return apiRequest<StoreSettings>("/admin/settings", PRIVATE);
+}
+
+export function updateStoreSettings(input: StoreSettingsInput): Promise<StoreSettings> {
+  return apiRequest<StoreSettings>("/admin/settings", { method: "PATCH", body: input });
+}
+
+export function listAudit(query: AuditQuery = {}): Promise<Paginated<AuditRow>> {
+  return apiRequest<Paginated<AuditRow>>(`/admin/audit${toQuery(query)}`, PRIVATE);
+}
+
+export function auditFilterOptions(): Promise<{ actions: string[]; entityTypes: string[] }> {
+  return apiRequest<{ actions: string[]; entityTypes: string[] }>("/admin/audit/filters", PRIVATE);
 }
 
 /** What the signed-in role may do, as a set the shell can ask cheaply. */
