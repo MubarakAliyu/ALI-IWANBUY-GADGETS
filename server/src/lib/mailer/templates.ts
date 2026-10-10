@@ -187,3 +187,70 @@ export function orderCancelledEmail(options: {
     }),
   };
 }
+
+export function paymentConfirmedEmail(options: {
+  to: string;
+  firstName: string;
+  orderNumber: string;
+  amountKobo: number;
+  invoiceNumber: string;
+  orderUrl: string;
+  company: CompanyBlock;
+}): Mail {
+  return {
+    to: options.to,
+    replyTo: options.company.email,
+    template: "payment-confirmed",
+    subject: `Payment received for ${options.orderNumber}`,
+    html: renderEmail({
+      title: "We have your payment",
+      preheader: `${formatNaira(options.amountKobo)} received for ${options.orderNumber}.`,
+      company: options.company,
+      body: `
+        <p>Thank you, ${escapeHtml(options.firstName)} — we have received your payment and your order is now
+        being prepared.</p>
+        ${detailRows([
+          ["Order", options.orderNumber],
+          ["Amount received", formatNaira(options.amountKobo)],
+          ["Invoice", options.invoiceNumber],
+        ])}
+        <p>Your invoice is attached to this email and is also on your order page.</p>
+        ${button("View your order", options.orderUrl)}`,
+    }),
+  };
+}
+
+export function invoiceEmail(options: {
+  to: string;
+  firstName: string;
+  orderNumber: string;
+  invoiceNumber: string;
+  totalKobo: number;
+  orderUrl: string;
+  company: CompanyBlock;
+  pdf: Buffer;
+}): Mail {
+  return {
+    to: options.to,
+    replyTo: options.company.email,
+    template: "invoice",
+    subject: `Invoice ${options.invoiceNumber} for ${options.orderNumber}`,
+    attachments: [
+      { filename: `${options.invoiceNumber}.pdf`, content: options.pdf, contentType: "application/pdf" },
+    ],
+    html: renderEmail({
+      title: `Invoice ${options.invoiceNumber}`,
+      preheader: `Your invoice for ${options.orderNumber}.`,
+      company: options.company,
+      body: `
+        <p>Hello ${escapeHtml(options.firstName)}, your invoice for order
+        <strong>${escapeHtml(options.orderNumber)}</strong> is attached as a PDF.</p>
+        ${detailRows([
+          ["Invoice", options.invoiceNumber],
+          ["Order", options.orderNumber],
+          ["Total", formatNaira(options.totalKobo)],
+        ])}
+        ${button("View your order", options.orderUrl)}`,
+    }),
+  };
+}

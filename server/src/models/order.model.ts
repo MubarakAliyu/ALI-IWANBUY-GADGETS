@@ -45,6 +45,14 @@ export type OrderAddressDoc = {
   landmark: string;
 };
 
+/** A note an admin leaves on an order for other admins. Never shown to the customer (overview §10 A-4). */
+export type AdminNoteDoc = {
+  body: string;
+  by: Types.ObjectId | null;
+  byName: string;
+  at: Date;
+};
+
 export type StatusEventDoc = {
   status: OrderStatus;
   at: Date;
@@ -69,6 +77,7 @@ export type OrderDoc = {
   status: OrderStatus;
   customerTransferRef: string | null;
   note: string | null;
+  adminNotes: AdminNoteDoc[];
   statusHistory: StatusEventDoc[];
   invoice: Types.ObjectId | null;
   cancelledReason: string | null;
@@ -109,6 +118,16 @@ const orderAddressSchema = new Schema<OrderAddressDoc>(
   { _id: false },
 );
 
+const adminNoteSchema = new Schema<AdminNoteDoc>(
+  {
+    body: { type: String, required: true },
+    by: { type: Schema.Types.ObjectId, ref: "Admin", default: null },
+    byName: { type: String, default: "" },
+    at: { type: Date, required: true },
+  },
+  { _id: false },
+);
+
 const statusEventSchema = new Schema<StatusEventDoc>(
   {
     status: { type: String, enum: ORDER_STATUS, required: true },
@@ -136,6 +155,7 @@ const orderSchema = new Schema<OrderDoc>(
     status: { type: String, enum: ORDER_STATUS, required: true },
     customerTransferRef: { type: String, default: null },
     note: { type: String, default: null },
+    adminNotes: { type: [adminNoteSchema], default: [] },
     statusHistory: { type: [statusEventSchema], default: [] },
     invoice: { type: Schema.Types.ObjectId, ref: "Invoice", default: null },
     cancelledReason: { type: String, default: null },

@@ -52,3 +52,47 @@ export function formatLagosTime(date: Date): string {
   const { hour, minute } = lagosParts(date);
   return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 }
+
+/**
+ * Africa/Lagos is UTC+1 all year — West Africa Time has had no daylight saving since 1945 — so a Lagos day
+ * boundary is an exact offset rather than something to look up. Everything that filters or groups by day uses
+ * these two, so "today" means the same thing on every screen.
+ */
+export const LAGOS_UTC_OFFSET = "+01:00";
+
+const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** The instant a Lagos day begins, from `YYYY-MM-DD`. Returns null for anything else. */
+export function lagosDayStart(day: string): Date | null {
+  if (!DAY_PATTERN.test(day)) {
+    return null;
+  }
+  const date = new Date(`${day}T00:00:00.000${LAGOS_UTC_OFFSET}`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/** The instant a Lagos day ends — inclusive of the whole day, so `from=to=today` covers today. */
+export function lagosDayEnd(day: string): Date | null {
+  if (!DAY_PATTERN.test(day)) {
+    return null;
+  }
+  const date = new Date(`${day}T23:59:59.999${LAGOS_UTC_OFFSET}`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/** `YYYY-MM-DD` for a Lagos wall-clock day — the inverse of `lagosDayStart`. */
+export function lagosDayKey(date: Date): string {
+  const { year, month, day } = lagosParts(date);
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+/** Start of the Lagos day that contains this instant. */
+export function startOfLagosDay(date: Date): Date {
+  return lagosDayStart(lagosDayKey(date)) ?? date;
+}
+
+/** Midnight at the start of the Lagos day `days` days before today. */
+export function lagosDaysAgo(days: number, now: Date = new Date()): Date {
+  const start = startOfLagosDay(now);
+  return new Date(start.getTime() - days * 24 * 60 * 60 * 1000);
+}

@@ -3,8 +3,10 @@ import { model, Schema, type Types } from "mongoose";
 
 /**
  * Payments and refunds (overview §7). A `Payment` is only ever written by an admin confirming money received,
- * with their own PIN — which is Batch 3. The model exists now so an order can be linked to one, and so the
- * collection and its index are in place before any money is recorded against them.
+ * with their own PIN.
+ *
+ * A refund is its own row with a **negative** `amountKobo` pointing at the payment it reverses, so the sum of
+ * the collection is the net money taken and no row is ever edited after the fact (ADR-018).
  */
 export type PaymentDoc = {
   _id: Types.ObjectId;
@@ -28,7 +30,7 @@ const paymentSchema = new Schema<PaymentDoc>(
     paymentNumber: { type: String, required: true, unique: true },
     order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
     customer: { type: Schema.Types.ObjectId, ref: "Customer", required: true },
-    amountKobo: { type: Number, required: true, min: 0 },
+    amountKobo: { type: Number, required: true },
     method: { type: String, enum: PAYMENT_METHOD, required: true },
     reference: { type: String, default: null },
     status: { type: String, enum: ["CONFIRMED", "REFUNDED"], default: "CONFIRMED" },

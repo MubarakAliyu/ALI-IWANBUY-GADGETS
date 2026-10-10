@@ -41,7 +41,9 @@ export const STORE_SETTINGS = {
   freeDeliveryThresholdKobo: parseNairaToKobo(500_000),
   unpaidAutoCancelHours: 48,
   lowStockDefault: 3,
-  invoiceFooterNote: "Clean. Modern. Reliable. — thank you for shopping with ALI_IWANBUY Gadgets.",
+  // The tagline is printed under this note by the invoice renderer, so the note itself does not repeat it.
+  invoiceFooterNote:
+    "Thank you for shopping with ALI_IWANBUY Gadgets. Goods remain the property of ALI_IWANBUY INTEGRATED SERVICE LTD until paid for in full. Keep this invoice for your warranty.",
 } as const;
 
 /**

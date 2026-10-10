@@ -210,6 +210,9 @@ export async function seedSettings(): Promise<void> {
     phone: "+234 703 925 4143",
     whatsapp: "+234 703 925 4143",
     email: "sales@aliiwanbuy.com",
+    // A placeholder account, deliberately not the owner's: the invoice tests need a bank line to render, and
+    // the `settings:apply-defaults` test needs something for the migration to replace.
+    bank: { bankName: "Opay", accountName: "ALI_IWANBUY GADGETS", accountNumber: "8039254143" },
     deliveryFees: { localKobo: 150_000, nationwideKobo: 500_000 },
     freeDeliveryThresholdKobo: 50_000_000,
   });

@@ -53,7 +53,10 @@ const settingSchema = new Schema<SettingDoc>(
     freeDeliveryThresholdKobo: { type: Number, default: null },
     unpaidAutoCancelHours: { type: Number, default: 48, min: 1 },
     lowStockDefault: { type: Number, default: 3, min: 0 },
-    invoiceFooterNote: { type: String, default: "Clean. Modern. Reliable." },
+    invoiceFooterNote: {
+      type: String,
+      default: "Thank you for shopping with ALI_IWANBUY Gadgets. Keep this invoice for your warranty.",
+    },
   },
   { timestamps: true },
 );

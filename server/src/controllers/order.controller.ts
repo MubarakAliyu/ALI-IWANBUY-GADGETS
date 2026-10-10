@@ -11,10 +11,10 @@ import {
   type TransferMadeInput,
 } from "@aib/shared";
 import type { Request, Response } from "express";
-import { AppError } from "../lib/app-error.js";
 import { loadSettings } from "../lib/settings.js";
 import { currentCustomer } from "../middleware/require-customer.js";
 import { validated } from "../middleware/validate.js";
+import { getCustomerInvoicePdf } from "../services/invoice.service.js";
 import * as orders from "../services/order.service.js";
 
 export async function placeOrder(req: Request, res: Response): Promise<void> {
@@ -68,13 +68,19 @@ export async function cancelOrder(req: Request, res: Response): Promise<void> {
 }
 
 /**
- * The invoice PDF. Invoices are issued by an admin confirming payment, which is Batch 3 — until then this
- * answers 404 rather than pretending a document exists.
+ * The invoice PDF. One is issued the moment an admin confirms payment, so this answers 404 only while an
+ * order is still unpaid. The file is rendered on first request and kept (overview §10 A-8).
  */
-export async function downloadInvoice(req: Request, _res: Response): Promise<void> {
+export async function downloadInvoice(req: Request, res: Response): Promise<void> {
   const customer = currentCustomer(req);
-  await orders.getCustomerOrder(customer._id.toString(), String(req.params.number));
-  throw AppError.notFound("No invoice has been issued for this order yet.");
+  const { invoice, pdf } = await getCustomerInvoicePdf(
+    customer._id.toString(),
+    String(req.params.number),
+  );
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename="${invoice.invoiceNumber}.pdf"`);
+  res.send(pdf);
 }
 
 /** What checkout needs before an order exists: the fees, where to collect, and the bank to pay into. */

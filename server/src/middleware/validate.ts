@@ -25,3 +25,24 @@ export function validateBody<T>(schema: ZodType<T>) {
 export function validated<T>(res: Response): T {
   return res.locals.validated as T;
 }
+
+/**
+ * The same, for the query string. A list screen's filters are a bookmark someone may have edited by hand, so
+ * an unparseable one answers 400 with field messages rather than throwing from inside a controller.
+ */
+export function validateQuery<T>(schema: ZodType<T>) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const parsed = schema.safeParse(req.query);
+    if (!parsed.success) {
+      next(AppError.badRequest("Those filters are not valid.", zodFields(parsed.error)));
+      return;
+    }
+    res.locals.query = parsed.data;
+    next();
+  };
+}
+
+/** The validated query, typed. Call it only in a handler that sits behind `validateQuery`. */
+export function validatedQuery<T>(res: Response): T {
+  return res.locals.query as T;
+}

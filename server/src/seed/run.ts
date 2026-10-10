@@ -18,6 +18,15 @@ import { SEED_PRODUCTS } from "./data/products.js";
 import { SEED_BRANDS, SEED_CATEGORIES } from "./data/taxonomy.js";
 import { STORE_SETTINGS } from "./data/store-settings.js";
 import { writePlaceholderImage } from "./placeholder-image.js";
+import {
+  DEMO_ADMIN_PASSWORD,
+  DEMO_ADMINS,
+  DEMO_CUSTOMER_PASSWORD,
+  seedAdmins,
+  seedCustomers,
+  seedOrderHistory,
+} from "./demo.js";
+import { writeDemoAccounts } from "./demo-accounts.js";
 
 export async function seedCatalogue(): Promise<{ categories: number; brands: number; products: number }> {
   const imageDir = path.resolve(process.cwd(), env.UPLOAD_DIR, "seed");
@@ -151,6 +160,11 @@ async function main(): Promise<void> {
   await connectDatabase();
   const counts = await seedCatalogue();
 
+  const admins = await seedAdmins();
+  const customers = await seedCustomers();
+  const history = await seedOrderHistory({ admins, customers });
+  await writeDemoAccounts();
+
   const variants = SEED_PRODUCTS.reduce((sum, product) => sum + product.variants.length, 0);
   const outOfStock = SEED_PRODUCTS.filter((product) =>
     product.variants.every((variant) => variant.stock === 0),
@@ -163,8 +177,15 @@ async function main(): Promise<void> {
   console.log(`    brands      ${counts.brands}`);
   console.log(`    products    ${counts.products} (${variants} variants, ${outOfStock} out of stock)`);
   console.log(`    images      server/${env.UPLOAD_DIR}/seed`);
+  console.log(`    admins      ${admins.length}`);
+  console.log(`    customers   ${customers.length}`);
+  console.log(`    orders      ${history.orders} (${history.payments} payments, ${history.invoices} invoices)`);
   console.log("");
-  console.log("  Admins, customers and order history are seeded in Batch 2 and Batch 3.");
+  console.log("  Demo sign-ins — also written to docs/DEMO-ACCOUNTS.md:");
+  for (const admin of DEMO_ADMINS) {
+    console.log(`    ${admin.role.padEnd(8)} ${admin.email.padEnd(28)} ${DEMO_ADMIN_PASSWORD}${admin.pin ? `  PIN ${admin.pin}` : ""}`);
+  }
+  console.log(`    CUSTOMER amina@example.com           ${DEMO_CUSTOMER_PASSWORD}`);
   console.log("");
 
   await disconnectDatabase();

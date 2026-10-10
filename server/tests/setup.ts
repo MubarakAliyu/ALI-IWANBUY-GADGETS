@@ -9,6 +9,9 @@
 process.env.NODE_ENV = "test";
 process.env.MONGODB_URI ??= "mongodb://127.0.0.1:27017/aib_test";
 process.env.LOG_LEVEL = "silent";
+// Test signing keys, so the suite does not depend on a developer having a local `.env`.
+process.env.CUSTOMER_JWT_SECRET ??= "test-only-customer-signing-key-0001";
+process.env.ADMIN_JWT_SECRET ??= "test-only-admin-signing-key-000001";
 
 import { MongoMemoryReplSet } from "mongodb-memory-server";
 import mongoose from "mongoose";

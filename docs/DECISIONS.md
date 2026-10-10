@@ -103,3 +103,27 @@ versions. Store email iwanbuygadgets@gmail.com. Bank for transfers: Moniepoint �
 shown to every customer at checkout and on invoices, so it is public-facing data and is seeded, editable in Store
 Settings. Opening hours: Mon–Fri 8 am–10 pm, Sat–Sun 10 am–10 pm (resolves the assumed hours). SMTP credentials
 are never committed.
+
+**ADR-018 · 10 Oct 2026 · A refund is a negative `Payment`, not an edited one.** The Batch 1 `Payment` schema
+constrained `amountKobo` to `min: 0`, which the refund path in Batch 3 cannot satisfy. Rather than storing a
+positive amount and inferring direction from `status`, a refund is written as its own row with a **negative**
+amount and `refundOf` pointing at the payment it reverses. The constraint is lifted. The sum of the collection
+is then the net money taken, the dashboard's revenue figure is a plain `$sum` with no special cases, and no
+payment row is ever edited after it is written — which is what an accounting record has to be.
+
+**ADR-019 · 10 Oct 2026 · The admin orders table gained internal notes.** Overview §10 A-4 lists "internal
+notes" among the order-detail actions; the Batch 3 prompt's Part D summary does not repeat it. The overview
+wins, so `Order.adminNotes` was added: append-only entries with the author and time, visible only through
+`/admin`, and never in the customer's `OrderDetail`. Correcting a note means writing another one.
+
+**ADR-020 · 10 Oct 2026 · A wrong payment PIN answers 401, not 400.** The PIN is a second sign-in rather than a
+form field, so a wrong one is an authentication failure. 401 lets the confirm-payment modal tell "that PIN is
+wrong" (shake the input, let them retry) apart from a 400 on the amount, while the response still carries the
+`pin` field detail so the input can be marked. The lock answers 423 as before.
+
+**ADR-021 · 10 Oct 2026 · Invoice PDFs are rendered on first download, not when issued.** Confirming a payment
+creates the `Invoice` row inside the transaction with an empty `pdfPath`; the A4 document is drawn the first
+time someone asks for it and then kept. Rendering inside the transaction would hold it open for a file write,
+and seeding sixty historical orders would otherwise mean drawing sixty documents nobody opens. If the stored
+file goes missing the renderer simply draws it again, since everything it prints comes from the order snapshot
+and Store Settings.
