@@ -9,6 +9,7 @@
 
 import { z } from "zod";
 import { objectIdSchema } from "./catalog.js";
+import { PRODUCT_CONDITION, PRODUCT_STATUS } from "./enums.js";
 import { emailSchema, nameSchema, passwordSchema, phoneSchema } from "./account.js";
 
 export const ADMIN_ROLES = ["OWNER", "MANAGER", "STAFF"] as const;
@@ -440,3 +441,155 @@ export const dashboardSchema = z.object({
     .nullable(),
 });
 export type Dashboard = z.infer<typeof dashboardSchema>;
+
+// ── Catalogue management (overview §10 A-5, A-6) ────────────────────────────────────────────────────
+
+/**
+ * A variant as the editor sends it. `id` is absent for a row that has just been added; the server keeps the
+ * existing variant when it is present, so editing a product never silently replaces the variant an order's
+ * line items point at.
+ */
+export const variantInputSchema = z.object({
+  id: objectIdSchema.optional(),
+  sku: z.string().trim().min(1, "Every variant needs a SKU").max(32),
+  label: z.string().trim().min(1, "Give the variant a label").max(80),
+  attributes: z
+    .object({
+      storage: z.string().trim().max(24).nullable().optional(),
+      colour: z.string().trim().max(24).nullable().optional(),
+      ram: z.string().trim().max(24).nullable().optional(),
+    })
+    .optional(),
+  priceKobo: z.number().int().min(0, "A price cannot be negative"),
+  compareAtPriceKobo: z.number().int().min(0).nullable().optional(),
+  stock: z.number().int().min(0, "Stock cannot be negative"),
+  lowStockThreshold: z.number().int().min(0).default(3),
+  isActive: z.boolean().default(true),
+});
+export type VariantInput = z.infer<typeof variantInputSchema>;
+
+export const productImageInputSchema = z.object({
+  url: z.string().min(1),
+  alt: z.string().trim().max(160).default(""),
+});
+export type ProductImageInput = z.infer<typeof productImageInputSchema>;
+
+export const productInputSchema = z.object({
+  name: z.string().trim().min(2, "Give the product a name").max(140),
+  slug: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Letters, numbers and dashes only")
+    .max(160)
+    .optional(),
+  brand: objectIdSchema,
+  category: objectIdSchema,
+  shortDescription: z.string().trim().max(240).default(""),
+  description: z.string().trim().max(8000).default(""),
+  highlights: z.array(z.string().trim().max(160)).max(8).default([]),
+  specs: z
+    .array(z.object({ label: z.string().trim().max(60), value: z.string().trim().max(160) }))
+    .max(20)
+    .default([]),
+  images: z.array(productImageInputSchema).max(6).default([]),
+  condition: z.enum(PRODUCT_CONDITION),
+  warrantyMonths: z.number().int().min(0).max(60).default(12),
+  tags: z.array(z.string().trim().max(40)).max(12).default([]),
+  isFeatured: z.boolean().default(false),
+  isNewArrival: z.boolean().default(false),
+  status: z.enum(PRODUCT_STATUS),
+  variants: z.array(variantInputSchema).min(1, "A product needs at least one variant"),
+});
+export type ProductInput = z.infer<typeof productInputSchema>;
+
+export const ADMIN_PRODUCT_SORTS = ["name", "priceFromKobo", "totalStock", "updatedAt"] as const;
+
+export const adminProductQuerySchema = z.object({
+  q: z.string().trim().max(80).optional(),
+  status: z.enum(PRODUCT_STATUS).optional(),
+  category: objectIdSchema.optional(),
+  brand: objectIdSchema.optional(),
+  stock: z.enum(["in", "low", "out"]).optional(),
+  sort: z.enum(ADMIN_PRODUCT_SORTS).optional(),
+  dir: z.enum(["asc", "desc"]).optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional(),
+});
+export type AdminProductQuery = z.infer<typeof adminProductQuerySchema>;
+
+export const adminProductRowSchema = z.object({
+  id: objectIdSchema,
+  name: z.string(),
+  slug: z.string(),
+  image: z.string().nullable(),
+  brandName: z.string(),
+  categoryName: z.string(),
+  status: z.enum(PRODUCT_STATUS),
+  condition: z.enum(PRODUCT_CONDITION),
+  variantCount: z.number().int(),
+  totalStock: z.number().int(),
+  priceFromKobo: z.number().int(),
+  updatedAt: z.string(),
+});
+export type AdminProductRow = z.infer<typeof adminProductRowSchema>;
+
+/** Several products at once: the one bulk action worth having is making things visible or hiding them. */
+export const bulkProductStatusSchema = z.object({
+  ids: z.array(objectIdSchema).min(1, "Choose at least one product").max(200),
+  status: z.enum(PRODUCT_STATUS),
+});
+export type BulkProductStatusInput = z.infer<typeof bulkProductStatusSchema>;
+
+/**
+ * Adjusting stock by a delta rather than setting a number: "three arrived" and "one was broken" are what
+ * actually happens in a shop, and a delta cannot silently overwrite a sale that landed a second earlier.
+ */
+export const stockAdjustSchema = z.object({
+  variantId: objectIdSchema,
+  delta: z
+    .number()
+    .int("Use a whole number")
+    .refine((value) => value !== 0, "Enter how many were added or removed"),
+  reason: z.string().trim().min(3, "Say why the stock changed").max(200),
+});
+export type StockAdjustInput = z.infer<typeof stockAdjustSchema>;
+
+export const categoryInputSchema = z.object({
+  name: z.string().trim().min(2, "Give the category a name").max(80),
+  slug: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Letters, numbers and dashes only")
+    .max(100)
+    .optional(),
+  parent: objectIdSchema.nullable().optional(),
+  image: z.string().max(400).nullable().optional(),
+  sortOrder: z.number().int().min(0).default(0),
+  isActive: z.boolean().default(true),
+});
+export type CategoryInput = z.infer<typeof categoryInputSchema>;
+
+export const brandInputSchema = z.object({
+  name: z.string().trim().min(1, "Give the brand a name").max(80),
+  slug: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Letters, numbers and dashes only")
+    .max(100)
+    .optional(),
+  // Exactly three, because that is what every SKU already built from it assumes.
+  code: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[A-Z0-9]{3}$/, "Three capitals or digits — it starts every SKU"),
+  logo: z.string().max(400).nullable().optional(),
+  isActive: z.boolean().default(true),
+});
+export type BrandInput = z.infer<typeof brandInputSchema>;
+
+/** Moving a category or brand up and down the list the storefront shows. */
+export const reorderSchema = z.object({
+  ids: z.array(objectIdSchema).min(1).max(200),
+});
+export type ReorderInput = z.infer<typeof reorderSchema>;

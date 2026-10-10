@@ -3,24 +3,33 @@ import {
   adminChangePasswordSchema,
   adminLoginSchema,
   adminOrderQuerySchema,
+  adminProductQuerySchema,
   adminProfileSchema,
   advanceOrderSchema,
+  brandInputSchema,
+  bulkProductStatusSchema,
+  categoryInputSchema,
   confirmPaymentSchema,
   dashboardQuerySchema,
   invoiceQuerySchema,
   orderNoteSchema,
   paymentQuerySchema,
+  productInputSchema,
   refundOrderSchema,
+  reorderSchema,
   setPinSchema,
+  stockAdjustSchema,
   voidInvoiceSchema,
 } from "@aib/shared";
 import { Router } from "express";
 import * as authController from "../controllers/admin-auth.controller.js";
+import * as catalogueController from "../controllers/admin-catalogue.controller.js";
 import * as orderController from "../controllers/admin-order.controller.js";
 import * as dashboardController from "../controllers/dashboard.controller.js";
 import { requirePermission } from "../lib/permissions.js";
 import { accountRateLimit, authRateLimit } from "../middleware/rate-limit.js";
 import { requireAdmin, requirePasswordChosen } from "../middleware/require-admin.js";
+import { uploadImage } from "../middleware/upload.js";
 import { validateBody, validateQuery } from "../middleware/validate.js";
 
 /**
@@ -109,6 +118,89 @@ adminRouter.post(
   validateBody(confirmPaymentSchema),
   orderController.confirm,
 );
+
+// ── Catalogue (A-5, A-6) ────────────────────────────────────────────────────────────────────────────
+//
+// Staff may look at products and change stock — that is counting a shelf. Changing a price, a description or
+// what is on sale is management work.
+
+adminRouter.get(
+  "/products",
+  requirePermission("products.view"),
+  validateQuery(adminProductQuerySchema),
+  catalogueController.list,
+);
+adminRouter.post(
+  "/products",
+  requirePermission("products.manage"),
+  validateBody(productInputSchema),
+  catalogueController.create,
+);
+adminRouter.post(
+  "/products/bulk-status",
+  requirePermission("products.manage"),
+  validateBody(bulkProductStatusSchema),
+  catalogueController.bulkStatus,
+);
+adminRouter.post(
+  "/uploads/:folder",
+  requirePermission("products.manage"),
+  uploadImage,
+  catalogueController.uploadImage,
+);
+adminRouter.get("/products/:id", requirePermission("products.view"), catalogueController.detail);
+adminRouter.patch(
+  "/products/:id",
+  requirePermission("products.manage"),
+  validateBody(productInputSchema),
+  catalogueController.update,
+);
+adminRouter.post(
+  "/products/:id/stock",
+  requirePermission("products.stock"),
+  validateBody(stockAdjustSchema),
+  catalogueController.adjustStock,
+);
+
+adminRouter.get("/categories", requirePermission("products.view"), catalogueController.categories);
+adminRouter.post(
+  "/categories",
+  requirePermission("catalogue.manage"),
+  validateBody(categoryInputSchema),
+  catalogueController.createCategory,
+);
+adminRouter.post(
+  "/categories/reorder",
+  requirePermission("catalogue.manage"),
+  validateBody(reorderSchema),
+  catalogueController.reorderCategories,
+);
+adminRouter.patch(
+  "/categories/:id",
+  requirePermission("catalogue.manage"),
+  validateBody(categoryInputSchema),
+  catalogueController.updateCategory,
+);
+adminRouter.delete(
+  "/categories/:id",
+  requirePermission("catalogue.manage"),
+  catalogueController.deleteCategory,
+);
+
+adminRouter.get("/brands", requirePermission("products.view"), catalogueController.brands);
+adminRouter.post(
+  "/brands",
+  requirePermission("catalogue.manage"),
+  validateBody(brandInputSchema),
+  catalogueController.createBrand,
+);
+adminRouter.patch(
+  "/brands/:id",
+  requirePermission("catalogue.manage"),
+  validateBody(brandInputSchema),
+  catalogueController.updateBrand,
+);
+adminRouter.delete("/brands/:id", requirePermission("catalogue.manage"), catalogueController.deleteBrand);
 
 // ── Payments (A-7) ──────────────────────────────────────────────────────────────────────────────────
 
