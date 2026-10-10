@@ -10,10 +10,15 @@ import type {
   AdminCancelOrderInput,
   AdminOrderQuery,
   AdminOrderRow,
+  AdminProductQuery,
+  AdminProductRow,
   AdminProfileInput,
   AdminSession,
   AdvanceOrderInput,
   AwaitingPaymentRow,
+  BrandInput,
+  BulkProductStatusInput,
+  CategoryInput,
   ConfirmPaymentFormInput,
   Dashboard,
   DashboardQuery,
@@ -25,8 +30,10 @@ import type {
   PaymentRow,
   PaymentTotals,
   Permission,
+  ProductInput,
   RefundOrderInput,
   SetPinInput,
+  StockAdjustInput,
   VoidInvoiceInput,
 } from "@aib/shared";
 import { apiRequest } from "@/lib/api";
@@ -201,6 +208,154 @@ export function invoicePdfHref(invoiceNumber: string): string {
 
 export function exportHref(what: "orders" | "payments" | "invoices", query: object = {}): string {
   return `/api/v1/admin/${what}/export${toQuery(query as Record<string, string | number | undefined>)}`;
+}
+
+// ── Catalogue ───────────────────────────────────────────────────────────────────────────────────────
+
+export function listAdminProducts(query: AdminProductQuery = {}): Promise<Paginated<AdminProductRow>> {
+  return apiRequest<Paginated<AdminProductRow>>(`/admin/products${toQuery(query)}`, PRIVATE);
+}
+
+/** A product in the shape the editor renders — the stored document, variant ids and all. */
+export type AdminProduct = {
+  _id: string;
+  name: string;
+  slug: string;
+  brand: string;
+  brandName: string;
+  category: string;
+  shortDescription: string;
+  description: string;
+  highlights: string[];
+  specs: { label: string; value: string }[];
+  images: { url: string; alt: string; sortOrder: number }[];
+  condition: ProductInput["condition"];
+  warrantyMonths: number;
+  tags: string[];
+  isFeatured: boolean;
+  isNewArrival: boolean;
+  status: ProductInput["status"];
+  variants: {
+    _id: string;
+    sku: string;
+    label: string;
+    attributes: { storage: string | null; colour: string | null; ram: string | null };
+    priceKobo: number;
+    compareAtPriceKobo: number | null;
+    stock: number;
+    lowStockThreshold: number;
+    isActive: boolean;
+  }[];
+  totalStock: number;
+  priceFromKobo: number;
+};
+
+export function getAdminProduct(id: string): Promise<AdminProduct> {
+  return apiRequest<AdminProduct>(`/admin/products/${id}`, PRIVATE);
+}
+
+export function createProduct(input: ProductInput): Promise<AdminProduct> {
+  return apiRequest<AdminProduct>("/admin/products", { method: "POST", body: input });
+}
+
+export function updateProduct(id: string, input: ProductInput): Promise<AdminProduct> {
+  return apiRequest<AdminProduct>(`/admin/products/${id}`, { method: "PATCH", body: input });
+}
+
+export function setProductStatus(input: BulkProductStatusInput): Promise<{ changed: number }> {
+  return apiRequest<{ changed: number }>("/admin/products/bulk-status", { method: "POST", body: input });
+}
+
+export function adjustStock(id: string, input: StockAdjustInput): Promise<AdminProduct> {
+  return apiRequest<AdminProduct>(`/admin/products/${id}/stock`, { method: "POST", body: input });
+}
+
+export type CategoryRow = {
+  id: string;
+  name: string;
+  slug: string;
+  parent: string | null;
+  parentName: string | null;
+  image: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  productCount: number;
+};
+
+export type BrandRow = {
+  id: string;
+  name: string;
+  slug: string;
+  code: string;
+  logo: string | null;
+  isActive: boolean;
+  productCount: number;
+};
+
+export function listAdminCategories(): Promise<{ data: CategoryRow[] }> {
+  return apiRequest<{ data: CategoryRow[] }>("/admin/categories", PRIVATE);
+}
+
+export function listAdminBrands(): Promise<{ data: BrandRow[] }> {
+  return apiRequest<{ data: BrandRow[] }>("/admin/brands", PRIVATE);
+}
+
+export function createCategory(input: CategoryInput): Promise<{ data: CategoryRow[] }> {
+  return apiRequest<{ data: CategoryRow[] }>("/admin/categories", { method: "POST", body: input });
+}
+
+export function updateCategory(id: string, input: CategoryInput): Promise<{ data: CategoryRow[] }> {
+  return apiRequest<{ data: CategoryRow[] }>(`/admin/categories/${id}`, { method: "PATCH", body: input });
+}
+
+export function deleteCategory(id: string): Promise<{ data: CategoryRow[] }> {
+  return apiRequest<{ data: CategoryRow[] }>(`/admin/categories/${id}`, { method: "DELETE" });
+}
+
+export function reorderCategories(ids: string[]): Promise<{ data: CategoryRow[] }> {
+  return apiRequest<{ data: CategoryRow[] }>("/admin/categories/reorder", {
+    method: "POST",
+    body: { ids },
+  });
+}
+
+export function createBrand(input: BrandInput): Promise<{ data: BrandRow[] }> {
+  return apiRequest<{ data: BrandRow[] }>("/admin/brands", { method: "POST", body: input });
+}
+
+export function updateBrand(id: string, input: BrandInput): Promise<{ data: BrandRow[] }> {
+  return apiRequest<{ data: BrandRow[] }>(`/admin/brands/${id}`, { method: "PATCH", body: input });
+}
+
+export function deleteBrand(id: string): Promise<{ data: BrandRow[] }> {
+  return apiRequest<{ data: BrandRow[] }>(`/admin/brands/${id}`, { method: "DELETE" });
+}
+
+/**
+ * Uploading goes through `fetch` directly rather than `apiRequest`: the body is `FormData`, which must carry
+ * its own multipart boundary, and setting a JSON content type on it would make the server unable to read it.
+ */
+export async function uploadImage(
+  file: File,
+  folder: "products" | "brands" | "categories" = "products",
+): Promise<{ url: string; width: number; height: number }> {
+  const body = new FormData();
+  body.append("image", file);
+
+  const response = await fetch(`/api/v1/admin/uploads/${folder}`, {
+    method: "POST",
+    body,
+    credentials: "include",
+  });
+
+  const payload = (await response.json()) as
+    | { url: string; width: number; height: number }
+    | { error: { message: string } };
+
+  if (!response.ok) {
+    throw new Error("error" in payload ? payload.error.message : "That image could not be uploaded.");
+  }
+  return payload as { url: string; width: number; height: number };
 }
 
 /** What the signed-in role may do, as a set the shell can ask cheaply. */

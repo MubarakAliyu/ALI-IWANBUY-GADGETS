@@ -9,6 +9,13 @@ export type ProductStatus = (typeof PRODUCT_STATUS)[number];
 export const PRODUCT_CONDITION = ["NEW", "UK_USED", "REFURBISHED"] as const;
 export type ProductCondition = (typeof PRODUCT_CONDITION)[number];
 
+/** What each status is called in the dashboard — the storefront never shows anything but ACTIVE. */
+export const PRODUCT_STATUS_LABEL: Record<ProductStatus, string> = {
+  DRAFT: "Draft",
+  ACTIVE: "In the shop",
+  ARCHIVED: "Archived",
+};
+
 export const CONDITION_LABEL: Record<ProductCondition, string> = {
   NEW: "Brand new",
   UK_USED: "UK used",
