@@ -3,13 +3,18 @@ import {
   adminChangePasswordSchema,
   adminLoginSchema,
   adminOrderQuerySchema,
+  adminCustomerQuerySchema,
   adminProductQuerySchema,
   adminProfileSchema,
+  adminStatusSchema,
   advanceOrderSchema,
   brandInputSchema,
   bulkProductStatusSchema,
+  auditQuerySchema,
   categoryInputSchema,
   confirmPaymentSchema,
+  createAdminSchema,
+  customerStatusSchema,
   dashboardQuerySchema,
   invoiceQuerySchema,
   orderNoteSchema,
@@ -17,14 +22,18 @@ import {
   productInputSchema,
   refundOrderSchema,
   reorderSchema,
+  resetAdminPasswordSchema,
   setPinSchema,
   stockAdjustSchema,
+  storeSettingsSchema,
+  updateAdminRoleSchema,
   voidInvoiceSchema,
 } from "@aib/shared";
 import { Router } from "express";
 import * as authController from "../controllers/admin-auth.controller.js";
 import * as catalogueController from "../controllers/admin-catalogue.controller.js";
 import * as orderController from "../controllers/admin-order.controller.js";
+import * as peopleController from "../controllers/admin-people.controller.js";
 import * as dashboardController from "../controllers/dashboard.controller.js";
 import { requirePermission } from "../lib/permissions.js";
 import { accountRateLimit, authRateLimit } from "../middleware/rate-limit.js";
@@ -216,6 +225,79 @@ adminRouter.get(
   requirePermission("payments.view"),
   validateQuery(paymentQuerySchema),
   orderController.payments,
+);
+
+// ── People, settings and the audit trail (A-9 … A-13) ───────────────────────────────────────────────
+//
+// Every role may look at a customer — the person at the counter needs to. What they have spent is behind
+// `customers.spend`, and the controller decides before the query runs, not after.
+
+adminRouter.get(
+  "/customers",
+  requirePermission("customers.view"),
+  validateQuery(adminCustomerQuerySchema),
+  peopleController.customers,
+);
+adminRouter.get(
+  "/customers/export",
+  requirePermission("customers.view"),
+  validateQuery(adminCustomerQuerySchema),
+  peopleController.exportCustomers,
+);
+adminRouter.post(
+  "/customers/:id/status",
+  requirePermission("customers.manage"),
+  validateBody(customerStatusSchema),
+  peopleController.setCustomerStatus,
+);
+
+adminRouter.get("/admins", requirePermission("admins.manage"), peopleController.admins);
+adminRouter.post(
+  "/admins",
+  requirePermission("admins.manage"),
+  validateBody(createAdminSchema),
+  peopleController.createAdmin,
+);
+adminRouter.patch(
+  "/admins/:id/role",
+  requirePermission("admins.manage"),
+  validateBody(updateAdminRoleSchema),
+  peopleController.updateAdminRole,
+);
+adminRouter.patch(
+  "/admins/:id/status",
+  requirePermission("admins.manage"),
+  validateBody(adminStatusSchema),
+  peopleController.setAdminStatus,
+);
+adminRouter.post(
+  "/admins/:id/reset-password",
+  requirePermission("admins.manage"),
+  validateBody(resetAdminPasswordSchema),
+  peopleController.resetAdminPassword,
+);
+
+adminRouter.get("/settings", requirePermission("settings.manage"), peopleController.getSettings);
+adminRouter.patch(
+  "/settings",
+  requirePermission("settings.manage"),
+  validateBody(storeSettingsSchema),
+  peopleController.updateSettings,
+);
+
+// The audit trail is read-only here and append-only in the model: there is no route that writes to it.
+adminRouter.get("/audit/filters", requirePermission("audit.view"), peopleController.auditFilters);
+adminRouter.get(
+  "/audit/export",
+  requirePermission("audit.view"),
+  validateQuery(auditQuerySchema),
+  peopleController.exportAudit,
+);
+adminRouter.get(
+  "/audit",
+  requirePermission("audit.view"),
+  validateQuery(auditQuerySchema),
+  peopleController.audit,
 );
 
 // ── Invoices (A-8) ──────────────────────────────────────────────────────────────────────────────────

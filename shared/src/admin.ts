@@ -593,3 +593,112 @@ export const reorderSchema = z.object({
   ids: z.array(objectIdSchema).min(1).max(200),
 });
 export type ReorderInput = z.infer<typeof reorderSchema>;
+
+// ── Customers, admins, settings and the audit trail (overview §10 A-9 … A-13) ───────────────────────
+
+export const adminCustomerQuerySchema = z.object({
+  q: z.string().trim().max(80).optional(),
+  status: z.enum(["ACTIVE", "SUSPENDED"]).optional(),
+  sort: z.enum(["createdAt", "name", "orders", "spendKobo"]).optional(),
+  dir: z.enum(["asc", "desc"]).optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional(),
+});
+export type AdminCustomerQuery = z.infer<typeof adminCustomerQuerySchema>;
+
+/**
+ * `spendKobo` and `lastOrderAt` are null for STAFF — the server omits them rather than the client hiding
+ * them, so a staff member reading the response learns nothing about what anyone has spent.
+ */
+export const adminCustomerRowSchema = z.object({
+  id: objectIdSchema,
+  name: z.string(),
+  email: z.string(),
+  phone: z.string(),
+  status: z.enum(["ACTIVE", "SUSPENDED"]),
+  orders: z.number().int(),
+  spendKobo: z.number().int().nullable(),
+  lastOrderAt: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type AdminCustomerRow = z.infer<typeof adminCustomerRowSchema>;
+
+export const customerStatusSchema = z.object({
+  status: z.enum(["ACTIVE", "SUSPENDED"]),
+  reason: z.string().trim().max(200).optional(),
+});
+export type CustomerStatusInput = z.infer<typeof customerStatusSchema>;
+
+/** Resetting another admin's password — the new one is shown once and never emailed in full. */
+export const resetAdminPasswordSchema = z.object({
+  reason: z.string().trim().max(200).optional(),
+});
+export type ResetAdminPasswordInput = z.infer<typeof resetAdminPasswordSchema>;
+
+export const storeSettingsSchema = z.object({
+  storeName: z.string().trim().min(2).max(80),
+  legalName: z.string().trim().min(2).max(140),
+  rcNumber: z.string().trim().max(20),
+  tin: z.string().trim().max(30),
+  registeredAddress: z.string().trim().min(5).max(300),
+  shopAddress: z.string().trim().min(5).max(300),
+  phone: z.string().trim().min(7).max(30),
+  whatsapp: z.string().trim().min(7).max(30),
+  email: emailSchema,
+  bank: z.object({
+    bankName: z.string().trim().max(60),
+    accountName: z.string().trim().max(80),
+    accountNumber: z.string().trim().regex(/^\d{0,12}$/, "Digits only"),
+  }),
+  openingHours: z
+    .array(
+      z.object({
+        days: z.string().trim().max(40),
+        opens: z.string().trim().max(12),
+        closes: z.string().trim().max(12),
+      }),
+    )
+    .max(7),
+  deliveryFees: z.object({
+    localKobo: z.number().int().min(0),
+    nationwideKobo: z.number().int().min(0),
+  }),
+  freeDeliveryThresholdKobo: z.number().int().min(0).nullable(),
+  unpaidAutoCancelHours: z.number().int().min(1).max(720),
+  lowStockDefault: z.number().int().min(0).max(100),
+  invoiceFooterNote: z.string().trim().max(400),
+});
+export type StoreSettingsInput = z.infer<typeof storeSettingsSchema>;
+
+export const auditQuerySchema = z.object({
+  q: z.string().trim().max(80).optional(),
+  action: z.string().trim().max(60).optional(),
+  entityType: z.string().trim().max(40).optional(),
+  actor: objectIdSchema.optional(),
+  actorType: z.enum(["ADMIN", "CUSTOMER", "SYSTEM"]).optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional(),
+});
+export type AuditQuery = z.infer<typeof auditQuerySchema>;
+
+export const auditRowSchema = z.object({
+  id: objectIdSchema,
+  at: z.string(),
+  actorType: z.enum(["ADMIN", "CUSTOMER", "SYSTEM"]),
+  actorName: z.string(),
+  actor: z.string().nullable(),
+  action: z.string(),
+  entityType: z.string(),
+  entityId: z.string().nullable(),
+  summary: z.string(),
+  diff: z
+    .object({
+      before: z.record(z.string(), z.unknown()).optional(),
+      after: z.record(z.string(), z.unknown()).optional(),
+    })
+    .nullable(),
+  ip: z.string().nullable(),
+});
+export type AuditRow = z.infer<typeof auditRowSchema>;

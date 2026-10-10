@@ -254,3 +254,37 @@ export function invoiceEmail(options: {
     }),
   };
 }
+
+/**
+ * Telling a new admin their account exists (A-10). It deliberately does **not** carry the temporary password:
+ * that is shown to the owner once, on screen, to hand over in person. An email that contains a working
+ * password is a working password sitting in an inbox.
+ */
+export function adminInviteEmail(options: {
+  to: string;
+  firstName: string;
+  role: string;
+  invitedBy: string;
+  loginUrl: string;
+  company: CompanyBlock;
+}): Mail {
+  return {
+    to: options.to,
+    replyTo: options.company.email,
+    template: "admin-invite",
+    subject: `You have a ${options.company.storeName} dashboard account`,
+    html: renderEmail({
+      title: `Hello ${options.firstName}`,
+      preheader: "Your dashboard account is ready.",
+      company: options.company,
+      body: `
+        <p>${escapeHtml(options.invitedBy)} has set you up on the ${escapeHtml(options.company.storeName)}
+        dashboard as <strong>${escapeHtml(options.role)}</strong>.</p>
+        <p>Ask them for your temporary password — it is not in this email, on purpose. The first time you sign
+        in you will be asked to choose a password only you know.</p>
+        ${button("Sign in to the dashboard", options.loginUrl)}
+        <p style="color:#646F7A;font-size:13px;">Everything you do in the dashboard is recorded against your
+        name. If you were not expecting this, reply to this email.</p>`,
+    }),
+  };
+}
