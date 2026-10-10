@@ -8,7 +8,7 @@
 
 import { z } from "zod";
 import { addressDtoSchema, addressSchema } from "./account.js";
-import { objectIdSchema, slugSchema } from "./catalog.js";
+import { objectIdSchema, openingHoursSchema, slugSchema } from "./catalog.js";
 import { DELIVERY_METHOD, ORDER_STATUS, PAYMENT_METHOD, PAYMENT_STATUS } from "./enums.js";
 
 export const checkoutLineSchema = z.object({
@@ -112,6 +112,9 @@ export const checkoutSettingsSchema = z.object({
   }),
   freeDeliveryThresholdKobo: z.number().int().min(0).nullable(),
   pickupAddress: z.string(),
+  /** So the success page can tell a customer who to call if the bank details are not published yet. */
+  phone: z.string(),
+  openingHours: z.array(openingHoursSchema),
   bank: z.object({ bankName: z.string(), accountName: z.string(), accountNumber: z.string() }),
 });
 export type CheckoutSettings = z.infer<typeof checkoutSettingsSchema>;

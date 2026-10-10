@@ -50,7 +50,7 @@ export default tseslint.config(
   },
   {
     // Scripts, seeds and the local database runner talk to the operator through stdout.
-    files: ["scripts/**", "server/src/seed/**", "server/scripts/**", "**/*.mjs"],
+    files: ["scripts/**", "server/src/seed/**", "server/src/scripts/**", "server/scripts/**", "**/*.mjs"],
     rules: { "no-console": "off" },
   },
   {

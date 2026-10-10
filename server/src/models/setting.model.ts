@@ -16,6 +16,7 @@ export type SettingDoc = {
   whatsapp: string;
   email: string;
   bank: { bankName: string; accountName: string; accountNumber: string };
+  openingHours: { days: string; opens: string; closes: string }[];
   deliveryFees: { localKobo: number; nationwideKobo: number };
   freeDeliveryThresholdKobo: number | null;
   unpaidAutoCancelHours: number;
@@ -40,6 +41,10 @@ const settingSchema = new Schema<SettingDoc>(
       bankName: { type: String, default: "" },
       accountName: { type: String, default: "" },
       accountNumber: { type: String, default: "" },
+    },
+    openingHours: {
+      type: [new Schema({ days: String, opens: String, closes: String }, { _id: false })],
+      default: [],
     },
     deliveryFees: {
       localKobo: { type: Number, default: 0, min: 0 },

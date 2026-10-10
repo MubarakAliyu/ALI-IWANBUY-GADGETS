@@ -1,12 +1,12 @@
 "use client";
 
-import type { CategoryNode } from "@aib/shared";
+import type { CategoryNode, PublicSettings } from "@aib/shared";
 import Link from "next/link";
 import { MenuIcon } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { SITE } from "@/lib/site";
+import { telHref } from "@/lib/site";
 import { useUiStore } from "@/stores/ui";
 
 const QUICK_LINKS = [
@@ -18,7 +18,13 @@ const QUICK_LINKS = [
 ];
 
 /** The phone navigation drawer (S-1): categories, then the pages people ask about at the counter. */
-export function MobileNav({ categories }: { categories: CategoryNode[] }) {
+export function MobileNav({
+  categories,
+  settings,
+}: {
+  categories: CategoryNode[];
+  settings: PublicSettings | null;
+}) {
   const open = useUiStore((state) => state.mobileNavOpen);
   const setOpen = useUiStore((state) => state.setMobileNavOpen);
 
@@ -77,9 +83,11 @@ export function MobileNav({ categories }: { categories: CategoryNode[] }) {
               {link.label}
             </Link>
           ))}
-          <a href={SITE.phoneHref} className="text-body-sm font-semibold text-brand-primary">
-            Call {SITE.phone}
-          </a>
+          {settings ? (
+            <a href={telHref(settings.phone)} className="text-body-sm font-semibold text-brand-primary">
+              Call {settings.phone}
+            </a>
+          ) : null}
         </nav>
       </SheetContent>
     </Sheet>

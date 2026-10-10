@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Article } from "@/components/shared/article";
-import { SITE } from "@/lib/site";
+import { telHref } from "@/lib/site";
+import { getStoreDetails } from "@/lib/store-details";
 
 export const metadata: Metadata = {
   title: "Warranty",
@@ -9,7 +10,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/warranty" },
 };
 
-export default function WarrantyPage() {
+export const revalidate = 60;
+
+export default async function WarrantyPage() {
+  const settings = await getStoreDetails();
+
   return (
     <Article
       title="Warranty"
@@ -44,9 +49,9 @@ export default function WarrantyPage() {
 
       <h2>Making a claim</h2>
       <p>
-        Call or WhatsApp <a href={SITE.phoneHref}>{SITE.phone}</a> with your order number, or bring the device
-        to the shop. Keep the box and accessories where you can. If a claim is not covered, we will tell you
-        what a repair would cost before doing anything.
+        Call or WhatsApp {settings ? <a href={telHref(settings.phone)}>{settings.phone}</a> : "the shop"} with
+        your order number, or bring the device to the shop. Keep the box and accessories where you can. If a
+        claim is not covered, we will tell you what a repair would cost before doing anything.
       </p>
       <p>
         Returns and refunds are covered separately under{" "}

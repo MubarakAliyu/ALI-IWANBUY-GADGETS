@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Article } from "@/components/shared/article";
-import { SITE } from "@/lib/site";
+import { SITE, telHref } from "@/lib/site";
+import { getStoreDetails } from "@/lib/store-details";
 
 export const metadata: Metadata = {
   title: "Privacy",
@@ -8,7 +10,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/privacy" },
 };
 
-export default function PrivacyPage() {
+export const revalidate = 60;
+
+export default async function PrivacyPage() {
+  const settings = await getStoreDetails();
+
   return (
     <Article
       title="Privacy"
@@ -52,7 +58,14 @@ export default function PrivacyPage() {
       <p>
         You can ask for a copy of what we hold about you, ask us to correct it, or ask us to close your
         account and delete what we are not required to keep. Email{" "}
-        <a href={`mailto:${SITE.email}`}>{SITE.email}</a> or call <a href={SITE.phoneHref}>{SITE.phone}</a>.
+        {settings ? (
+          <>
+            <a href={`mailto:${settings.email}`}>{settings.email}</a> or call{" "}
+            <a href={telHref(settings.phone)}>{settings.phone}</a>.
+          </>
+        ) : (
+          <Link href="/contact">the contact page</Link>
+        )}
       </p>
 
       <h2>Cookies</h2>

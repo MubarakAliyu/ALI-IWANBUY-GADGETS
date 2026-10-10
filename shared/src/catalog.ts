@@ -176,6 +176,14 @@ export const homePayloadSchema = z.object({
 });
 export type HomePayload = z.infer<typeof homePayloadSchema>;
 
+/** When the shop is open, as the owner keeps it in Store Settings. */
+export const openingHoursSchema = z.object({
+  days: z.string(),
+  opens: z.string(),
+  closes: z.string(),
+});
+export type OpeningHours = z.infer<typeof openingHoursSchema>;
+
 export const publicSettingsSchema = z.object({
   storeName: z.string(),
   legalName: z.string(),
@@ -191,6 +199,7 @@ export const publicSettingsSchema = z.object({
     nationwideKobo: z.number().int().min(0),
   }),
   freeDeliveryThresholdKobo: z.number().int().min(0).nullable(),
+  openingHours: z.array(openingHoursSchema),
 });
 export type PublicSettings = z.infer<typeof publicSettingsSchema>;
 

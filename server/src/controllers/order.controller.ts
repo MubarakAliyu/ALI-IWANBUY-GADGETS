@@ -87,6 +87,12 @@ export async function checkoutSettings(_req: Request, res: Response): Promise<vo
     },
     freeDeliveryThresholdKobo: settings.freeDeliveryThresholdKobo,
     pickupAddress: settings.shopAddress,
+    phone: settings.phone,
+    openingHours: settings.openingHours.map((entry) => ({
+      days: entry.days,
+      opens: entry.opens,
+      closes: entry.closes,
+    })),
     bank: {
       bankName: settings.bank.bankName,
       accountName: settings.bank.accountName,

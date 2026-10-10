@@ -18,6 +18,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "seed": "pnpm --filter @aib/server seed",
+    "settings:apply-defaults": "pnpm --filter @aib/server settings:apply-defaults",
     "db:local": "pnpm --filter @aib/server db:local",
     "images:prepare": "node scripts/prepare-images.mjs",
     "lighthouse": "node scripts/lighthouse.mjs"

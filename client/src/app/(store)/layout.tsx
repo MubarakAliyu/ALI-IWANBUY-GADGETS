@@ -2,6 +2,7 @@ import type { CategoryNode } from "@aib/shared";
 import { SiteFooter } from "@/components/store/site-footer";
 import { SiteHeader } from "@/components/store/site-header";
 import { getCategories } from "@/lib/catalog";
+import { getStoreDetails } from "@/lib/store-details";
 
 /**
  * The chrome every storefront page shares. The category tree is fetched once here and handed to both the
@@ -19,7 +20,7 @@ async function getCategoriesOrEmpty(): Promise<CategoryNode[]> {
 }
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
-  const categories = await getCategoriesOrEmpty();
+  const [categories, settings] = await Promise.all([getCategoriesOrEmpty(), getStoreDetails()]);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -30,11 +31,11 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         Skip to content
       </a>
 
-      <SiteHeader categories={categories} />
+      <SiteHeader categories={categories} settings={settings} />
       <main id="main" className="flex-1">
         {children}
       </main>
-      <SiteFooter categories={categories} />
+      <SiteFooter categories={categories} settings={settings} />
     </div>
   );
 }

@@ -20,7 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { declareTransfer, getCheckoutSettings, getOrder } from "@/lib/account";
 import { ApiRequestError } from "@/lib/api";
 import { formatNaira } from "@/lib/money";
-import { SITE } from "@/lib/site";
+import { formatOpeningHours, telHref } from "@/lib/site";
 
 /**
  * The page after an order is placed (S-10). For a bank transfer it is the only place the customer is told
@@ -65,6 +65,7 @@ export function OrderSuccessView({ orderNumber }: { orderNumber: string }) {
   }
 
   const awaitingTransfer = order.paymentMethod === "BANK_TRANSFER" && order.status === "PENDING_PAYMENT";
+  const phone = settings?.phone ?? "";
   const bankMissing = !settings?.bank.accountNumber || settings.bank.accountNumber.startsWith("UPDATE");
 
   return (
@@ -96,9 +97,13 @@ export function OrderSuccessView({ orderNumber }: { orderNumber: string }) {
           {bankMissing ? (
             <p className="rounded-md bg-warning-tint p-3 text-body-sm text-warning-text">
               Our bank details are not published yet. Please call or WhatsApp{" "}
-              <a href={SITE.phoneHref} className="font-semibold underline underline-offset-4">
-                {SITE.phone}
-              </a>{" "}
+              {phone ? (
+                <a href={telHref(phone)} className="font-semibold underline underline-offset-4">
+                  {phone}
+                </a>
+              ) : (
+                "the shop"
+              )}{" "}
               and we will give you the account over the phone.
             </p>
           ) : (
@@ -135,10 +140,17 @@ export function OrderSuccessView({ orderNumber }: { orderNumber: string }) {
             We are preparing your order. You will pay {formatNaira(order.totalKobo)} when it reaches you.
           </p>
           {order.deliveryMethod === "PICKUP" ? (
-            <p className="flex items-start gap-3 text-body-sm text-text-muted">
+            <div className="flex items-start gap-3 text-body-sm text-text-muted">
               <StoreIcon aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-brand-primary" />
-              Collect it at {settings?.pickupAddress ?? SITE.shopAddress}, Monday to Saturday, 9:00 to 18:00.
-            </p>
+              <span>
+                Collect it at {settings?.pickupAddress ?? "our shop"}.
+                {settings?.openingHours.map((entry) => (
+                  <span key={entry.days} className="block">
+                    {formatOpeningHours(entry)}
+                  </span>
+                ))}
+              </span>
+            </div>
           ) : null}
         </section>
       )}

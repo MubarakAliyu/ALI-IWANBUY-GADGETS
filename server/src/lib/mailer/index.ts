@@ -21,6 +21,8 @@ export type Mail = {
   html: string;
   /** Names the file in the dev outbox and appears in the logs: `welcome`, `order-placed`, … */
   template: string;
+  /** Where a reply goes — the shop's own address, so a customer can simply hit reply. */
+  replyTo?: string;
   attachments?: MailAttachment[];
 };
 
@@ -71,6 +73,7 @@ function createSmtpMailer(): Mailer {
 
       await transporter.sendMail({
         from: env.MAIL_FROM,
+        ...(mail.replyTo ? { replyTo: mail.replyTo } : {}),
         to: mail.to,
         subject: mail.subject,
         html: mail.html,

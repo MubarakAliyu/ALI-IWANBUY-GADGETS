@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Article } from "@/components/shared/article";
-import { SITE } from "@/lib/site";
+import { SITE, telHref } from "@/lib/site";
+import { getStoreDetails } from "@/lib/store-details";
 
 export const metadata: Metadata = {
   title: "About us",
@@ -9,7 +10,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
 };
 
-export default function AboutPage() {
+export const revalidate = 60;
+
+export default async function AboutPage() {
+  const settings = await getStoreDetails();
+
   return (
     <Article
       title="About ALI_IWANBUY Gadgets"
@@ -38,15 +43,22 @@ export default function AboutPage() {
 
       <h2>Where to find us</h2>
       <p>
-        {SITE.shopAddress}. Our registered office is {SITE.registeredAddress}. Call or WhatsApp{" "}
-        <a href={SITE.phoneHref}>{SITE.phone}</a>, or read the <Link href="/contact">contact page</Link> for
-        opening times.
+        {settings ? `${settings.shopAddress}. ` : ""}
+        {settings ? (
+          <>
+            Call or WhatsApp <a href={telHref(settings.phone)}>{settings.phone}</a>, or read the{" "}
+          </>
+        ) : (
+          <>Read the </>
+        )}
+        <Link href="/contact">contact page</Link> for opening times.
       </p>
 
       <h2>Who we are</h2>
       <p>
-        {SITE.legalName} is registered in Nigeria — RC {SITE.rcNumber}, TIN {SITE.tin}. The website was built
-        by Starnova Labs.
+        {settings?.legalName ?? SITE.legalName} is registered in Nigeria
+        {settings ? ` — RC ${settings.rcNumber}, TIN ${settings.tin}` : ""}. The website was built by Starnova
+        Labs.
       </p>
     </Article>
   );

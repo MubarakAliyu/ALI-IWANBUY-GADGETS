@@ -58,6 +58,7 @@ export function welcomeEmail(options: {
 }): Mail {
   return {
     to: options.to,
+    replyTo: options.company.email,
     template: "welcome",
     subject: `Welcome to ${options.company.storeName}`,
     html: renderEmail({
@@ -100,6 +101,7 @@ export function orderPlacedEmail(options: {
 
   return {
     to: options.to,
+    replyTo: options.company.email,
     template: "order-placed",
     subject: `Order ${order.orderNumber} received`,
     html: renderEmail({
@@ -135,6 +137,7 @@ export function orderStatusEmail(options: {
   const label = ORDER_STATUS_LABEL[options.status];
   return {
     to: options.to,
+    replyTo: options.company.email,
     template: `order-${options.status.toLowerCase().replace(/_/g, "-")}`,
     subject: `Order ${options.orderNumber} — ${label.toLowerCase()}`,
     html: renderEmail({
@@ -163,6 +166,7 @@ export function orderCancelledEmail(options: {
 }): Mail {
   return {
     to: options.to,
+    replyTo: options.company.email,
     template: "order-cancelled",
     subject: `Order ${options.orderNumber} cancelled`,
     html: renderEmail({

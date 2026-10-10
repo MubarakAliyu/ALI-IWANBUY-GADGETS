@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { Container } from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
-import { SITE } from "@/lib/site";
 
 /**
  * Something failed while rendering (S-14). The customer gets a way forward and the shop's phone number; the
@@ -25,11 +24,11 @@ export default function ErrorBoundary({
     <Container className="grid justify-items-center gap-5 py-20 text-center">
       <h1 className="text-h1 text-brand-navy">Something went wrong</h1>
       <p className="max-w-md text-body text-text-muted">
-        The page could not be loaded. Try again — if it keeps happening, call us on{" "}
-        <a href={SITE.phoneHref} className="font-semibold text-brand-primary">
-          {SITE.phone}
-        </a>{" "}
-        and we will take your order by phone.
+        The page could not be loaded. Try again — if it keeps happening,{" "}
+        <Link href="/contact" className="font-semibold text-brand-primary">
+          call or message the shop
+        </Link>{" "}
+        and we will take your order by hand.
       </p>
       <div className="flex flex-wrap justify-center gap-3">
         <Button onClick={reset}>Try again</Button>

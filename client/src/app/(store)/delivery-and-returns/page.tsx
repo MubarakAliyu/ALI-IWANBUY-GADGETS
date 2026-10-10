@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Article } from "@/components/shared/article";
-import { SITE } from "@/lib/site";
+import { SITE, telHref } from "@/lib/site";
+import { getStoreDetails } from "@/lib/store-details";
 
 export const metadata: Metadata = {
   title: "Delivery & returns",
@@ -9,7 +10,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/delivery-and-returns" },
 };
 
-export default function DeliveryAndReturnsPage() {
+export const revalidate = 60;
+
+export default async function DeliveryAndReturnsPage() {
+  const settings = await getStoreDetails();
+
   return (
     <Article
       title="Delivery & returns"
@@ -17,8 +22,8 @@ export default function DeliveryAndReturnsPage() {
     >
       <h2>Pickup at the shop</h2>
       <p>
-        Free. Order online, and collect at {SITE.shopAddress} once we confirm your payment. Bring the order
-        number and a form of ID. Orders are held for seven days.
+        Free. Order online, and collect at {settings?.shopAddress ?? "our shop"} once we confirm your payment.
+        Bring the order number and a form of ID. Orders are held for seven days.
       </p>
 
       <h2>Delivery within {SITE.city}</h2>
@@ -61,8 +66,8 @@ export default function DeliveryAndReturnsPage() {
 
       <h2>How to start a return</h2>
       <p>
-        Call or WhatsApp <a href={SITE.phoneHref}>{SITE.phone}</a> with your order number. We will tell you
-        whether to bring the item in or send it back, and what to expect.
+        Call or WhatsApp {settings ? <a href={telHref(settings.phone)}>{settings.phone}</a> : "the shop"} with
+        your order number. We will tell you whether to bring the item in or send it back, and what to expect.
       </p>
     </Article>
   );

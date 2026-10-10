@@ -24,7 +24,7 @@ import { ApiRequestError } from "@/lib/api";
 import { validateCart } from "@/lib/catalog";
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/money";
-import { SITE } from "@/lib/site";
+import { formatOpeningHours, SITE } from "@/lib/site";
 import { cartSubtotalKobo, useCartStore } from "@/stores/cart";
 
 /**
@@ -154,7 +154,7 @@ export function CheckoutView() {
               onSelect={() => setDeliveryMethod("PICKUP")}
               icon={<StoreIcon aria-hidden="true" className="size-5" />}
               title="Pickup at the shop"
-              description={settings?.pickupAddress ?? SITE.shopAddress}
+              description={settings?.pickupAddress ?? "Collect from the shop"}
               price="Free"
               testId="delivery-PICKUP"
             />
@@ -236,10 +236,12 @@ export function CheckoutView() {
               ) : null}
             </div>
           ) : (
-            <p className="rounded-md bg-grey-50 p-4 text-body-sm text-text-muted">
-              Collect from {settings?.pickupAddress ?? SITE.shopAddress}. Monday to Saturday, 9:00 to 18:00.
-              Bring your order number.
-            </p>
+            <div className="grid gap-1 rounded-md bg-grey-50 p-4 text-body-sm text-text-muted">
+              <p>Collect from {settings?.pickupAddress ?? "our shop"}. Bring your order number.</p>
+              {settings?.openingHours.map((entry) => (
+                <p key={entry.days}>{formatOpeningHours(entry)}</p>
+              ))}
+            </div>
           )}
         </section>
 

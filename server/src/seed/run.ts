@@ -7,39 +7,17 @@
  */
 
 import path from "node:path";
-import { parseNairaToKobo } from "@aib/shared";
 import type mongoose from "mongoose";
 import { env } from "../config/env.js";
 import { connectDatabase, disconnectDatabase } from "../db.js";
+import { parseNairaToKobo } from "@aib/shared";
 import { buildSku, suggestModelCode } from "../lib/sku.js";
 import { slugify } from "../lib/slug.js";
 import { Brand, Category, Counter, Product, Setting } from "../models/index.js";
 import { SEED_PRODUCTS } from "./data/products.js";
 import { SEED_BRANDS, SEED_CATEGORIES } from "./data/taxonomy.js";
+import { STORE_SETTINGS } from "./data/store-settings.js";
 import { writePlaceholderImage } from "./placeholder-image.js";
-
-/** The company block from overview §5. The bank details are deliberately blank until the owner fills them in. */
-const SETTINGS = {
-  storeName: "ALI_IWANBUY Gadgets",
-  legalName: "ALI_IWANBUY INTEGRATED SERVICE LTD",
-  rcNumber: "8276954",
-  tin: "32843883-0001",
-  registeredAddress: "No. 26, Olumbo Plaza, Ahmadu Bello Way, Birnin Kebbi, Kebbi State, Nigeria",
-  shopAddress: "Shop 7 & 8, Olumbu Plaza, Birnin Kebbi, Kebbi State, Nigeria",
-  phone: "+234 703 925 4143",
-  whatsapp: "+234 703 925 4143",
-  email: "sales@aliiwanbuy.com",
-  bank: {
-    bankName: "UPDATE IN SETTINGS",
-    accountName: "UPDATE IN SETTINGS",
-    accountNumber: "UPDATE IN SETTINGS",
-  },
-  deliveryFees: { localKobo: parseNairaToKobo(1_500), nationwideKobo: parseNairaToKobo(5_000) },
-  freeDeliveryThresholdKobo: parseNairaToKobo(500_000),
-  unpaidAutoCancelHours: 48,
-  lowStockDefault: 3,
-  invoiceFooterNote: "Clean. Modern. Reliable. — thank you for shopping with ALI_IWANBUY Gadgets.",
-};
 
 export async function seedCatalogue(): Promise<{ categories: number; brands: number; products: number }> {
   const imageDir = path.resolve(process.cwd(), env.UPLOAD_DIR, "seed");
@@ -52,7 +30,7 @@ export async function seedCatalogue(): Promise<{ categories: number; brands: num
     Counter.deleteMany({}),
   ]);
 
-  await Setting.create(SETTINGS);
+  await Setting.create(STORE_SETTINGS);
 
   const categoryIds = new Map<string, mongoose.Types.ObjectId>();
   let categoryCount = 0;
@@ -154,7 +132,7 @@ export async function seedCatalogue(): Promise<{ categories: number; brands: num
           compareAtPriceKobo:
             variant.compareAtNaira === undefined ? null : parseNairaToKobo(variant.compareAtNaira),
           stock: variant.stock,
-          lowStockThreshold: variant.lowStockThreshold ?? SETTINGS.lowStockDefault,
+          lowStockThreshold: variant.lowStockThreshold ?? STORE_SETTINGS.lowStockDefault,
           isActive: true,
         };
       }),
@@ -180,7 +158,7 @@ async function main(): Promise<void> {
 
   console.log("");
   console.log("  Seeded ALI_IWANBUY Gadgets");
-  console.log(`    settings    1 (bank details marked UPDATE IN SETTINGS)`);
+  console.log(`    settings    1 (${STORE_SETTINGS.bank.bankName} · ${STORE_SETTINGS.bank.accountNumber})`);
   console.log(`    categories  ${counts.categories}`);
   console.log(`    brands      ${counts.brands}`);
   console.log(`    products    ${counts.products} (${variants} variants, ${outOfStock} out of stock)`);

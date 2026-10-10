@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { getProduct, getRelatedProducts, listProducts } from "@/lib/catalog";
 import { koboToNaira } from "@/lib/money";
 import { SITE, whatsappLink } from "@/lib/site";
+import { getStoreDetails } from "@/lib/store-details";
 
 export const revalidate = 60;
 
@@ -65,7 +66,10 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
-  const related = await getRelatedProducts(slug).catch(() => []);
+  const [related, settings] = await Promise.all([
+    getRelatedProducts(slug).catch(() => []),
+    getStoreDetails(),
+  ]);
   const inStock = product.totalStock > 0;
 
   /** Schema.org Product, so the shop can appear properly in a search result (S-5). */
@@ -151,8 +155,10 @@ export default async function ProductPage({ params }: PageProps) {
             <li className="flex gap-3 text-body-sm">
               <StoreIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-brand-primary" />
               <span>
-                <strong className="font-semibold">Pickup in {SITE.city}</strong> — collect the same day at{" "}
-                {SITE.shopAddress}.
+                <strong className="font-semibold">Pickup in {SITE.city}</strong>
+                {settings
+                  ? ` — collect the same day at ${settings.shopAddress}.`
+                  : " — collect the same day at our shop."}
               </span>
             </li>
             <li className="flex gap-3 text-body-sm">
@@ -173,15 +179,20 @@ export default async function ProductPage({ params }: PageProps) {
             </li>
           </ul>
 
-          <a
-            href={whatsappLink(`Hello ${SITE.name}, I would like to ask about the ${product.name}.`)}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex w-fit items-center gap-2 text-body-sm font-semibold text-brand-primary hover:underline"
-          >
-            <MessageCircleIcon aria-hidden="true" className="size-4" />
-            WhatsApp us about this product
-          </a>
+          {settings ? (
+            <a
+              href={whatsappLink(
+                settings.whatsapp,
+                `Hello ${SITE.name}, I would like to ask about the ${product.name}.`,
+              )}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex w-fit items-center gap-2 text-body-sm font-semibold text-brand-primary hover:underline"
+            >
+              <MessageCircleIcon aria-hidden="true" className="size-4" />
+              WhatsApp us about this product
+            </a>
+          ) : null}
         </div>
       </div>
 

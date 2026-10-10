@@ -2,13 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { SITE } from "@/lib/site";
+import { getStoreDetails } from "@/lib/store-details";
 
 /**
  * The sign-in and registration shell (S-8): the form on the left, an approved brand photograph on the right
  * from `lg` up. On a phone the panel is gone entirely — a customer signing in on 4G should download a form,
  * not a photograph.
  */
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getStoreDetails();
+
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
       <div className="flex flex-col px-4 py-8 sm:px-10">
@@ -23,7 +26,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </main>
 
         <footer className="mt-10 text-caption text-text-muted">
-          © {new Date().getFullYear()} {SITE.legalName} · RC {SITE.rcNumber}
+          © {new Date().getFullYear()} {settings?.legalName ?? SITE.legalName}
+          {settings ? ` · RC ${settings.rcNumber}` : ""}
         </footer>
       </div>
 

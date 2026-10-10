@@ -16,15 +16,15 @@
 The owner has supplied the real store details. Apply them before feature work, in one commit
 ("Apply the owner's store details"), and record ADR-017 (already drafted in `docs/DECISIONS.md`).
 
-| Field | Value |
-|---|---|
+| Field                                                                                 | Value                                                                            |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Shop address (storefront, footer, contact page, pickup copy, emails **and invoices**) | Shop No. 26, Bindawa Plaza, Ahmadu Bello Way, Birnin Kebbi, Kebbi State, Nigeria |
-| Store email (contact page, footer, invoices, `reply-to` on every email) | iwanbuygadgets@gmail.com |
-| Phone / WhatsApp | +234 703 925 4143 (unchanged) |
-| Bank — bank name | Moniepoint |
-| Bank — account name | ALI ABDULLAHI |
-| Bank — account number | 5737727740 |
-| Opening hours | Monday – Friday 8:00 am – 10:00 pm · Saturday – Sunday 10:00 am – 10:00 pm |
+| Store email (contact page, footer, invoices, `reply-to` on every email)               | iwanbuygadgets@gmail.com                                                         |
+| Phone / WhatsApp                                                                      | +234 703 925 4143 (unchanged)                                                    |
+| Bank — bank name                                                                      | Moniepoint                                                                       |
+| Bank — account name                                                                   | ALI ABDULLAHI                                                                    |
+| Bank — account number                                                                 | 5737727740                                                                       |
+| Opening hours                                                                         | Monday – Friday 8:00 am – 10:00 pm · Saturday – Sunday 10:00 am – 10:00 pm       |
 
 - [ ] Seed `Setting` with these values (replace every `UPDATE IN SETTINGS` placeholder) and add an `openingHours`
       field (`[{ days, opens, closes }]`) so the owner can edit hours in Store Settings (Part F).

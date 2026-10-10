@@ -398,5 +398,10 @@ export async function getPublicSettings(): Promise<PublicSettings> {
       nationwideKobo: setting.deliveryFees.nationwideKobo,
     },
     freeDeliveryThresholdKobo: setting.freeDeliveryThresholdKobo,
+    openingHours: setting.openingHours.map((entry) => ({
+      days: entry.days,
+      opens: entry.opens,
+      closes: entry.closes,
+    })),
   };
 }

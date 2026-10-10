@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Article } from "@/components/shared/article";
-import { SITE } from "@/lib/site";
+import { SITE, telHref } from "@/lib/site";
+import { getStoreDetails } from "@/lib/store-details";
 
 export const metadata: Metadata = {
   title: "Terms",
@@ -9,7 +10,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/terms" },
 };
 
-export default function TermsPage() {
+export const revalidate = 60;
+
+export default async function TermsPage() {
+  const settings = await getStoreDetails();
+
   return (
     <Article
       title="Terms and conditions"
@@ -33,7 +38,9 @@ export default function TermsPage() {
       <p>
         Bank transfer or pay on delivery. A transfer is only treated as received once a named member of our
         staff has confirmed it against our bank account. Never send money to an account that was not shown to
-        you on this website — call <a href={SITE.phoneHref}>{SITE.phone}</a> if anything looks wrong.
+        you on this website — call{" "}
+        {settings ? <a href={telHref(settings.phone)}>{settings.phone}</a> : "the shop"} if anything looks
+        wrong.
       </p>
 
       <h2>Delivery</h2>
@@ -59,8 +66,16 @@ export default function TermsPage() {
 
       <h2>Contact</h2>
       <p>
-        {SITE.legalName}, {SITE.registeredAddress}. RC {SITE.rcNumber} · TIN {SITE.tin}. Email{" "}
-        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+        {settings ? (
+          <>
+            {settings.legalName}, {settings.registeredAddress}. RC {settings.rcNumber} · TIN {settings.tin}.
+            Email <a href={`mailto:${settings.email}`}>{settings.email}</a>.
+          </>
+        ) : (
+          <>
+            {SITE.legalName}. See the <Link href="/contact">contact page</Link> for our address and email.
+          </>
+        )}
       </p>
     </Article>
   );
