@@ -30,11 +30,22 @@ function adminSecret(): string {
   return env.ADMIN_JWT_SECRET;
 }
 
+/**
+ * `sameSite: "lax"` is the default and the one we want, because in production the browser only ever talks to
+ * the Vercel domain: Vercel rewrites `/api/*` to the Render service, so the cookie is first-party and a
+ * cross-site cookie is never needed (Batch 3 Part H.1).
+ *
+ * `COOKIE_SAMESITE=none` exists as the fallback for a deployment that does *not* proxy — the dashboard on one
+ * domain and the API on another. It forces `secure` too, since no browser accepts `SameSite=None` without it,
+ * and it is documented in `docs/DEPLOYMENT.md` as the less-good option it is.
+ */
 function cookieOptions(maxAgeMs: number): CookieOptions {
+  const crossSite = env.COOKIE_SAMESITE === "none";
+
   return {
     httpOnly: true,
-    sameSite: "lax",
-    secure: isProduction,
+    sameSite: crossSite ? "none" : "lax",
+    secure: crossSite || isProduction,
     path: "/",
     maxAge: maxAgeMs,
   };

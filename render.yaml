@@ -1,0 +1,63 @@
+# Render blueprint for the ALI_IWANBUY Gadgets API (Batch 3 Part H.1).
+#
+# The client is NOT here — it is a Vercel project rooted at `client/`, which rewrites `/api/*` and
+# `/uploads/*` to this service. That is what keeps the auth cookies first-party: the browser only ever talks
+# to the Vercel domain, so `sameSite=lax` works and no CORS preflight stands between a page and its data.
+#
+# Values marked `sync: false` are set by hand in the Render dashboard and are never committed.
+
+services:
+  - type: web
+    name: aib-api
+    runtime: node
+    region: frankfurt # Closest of Render's free regions to Nigeria.
+    plan: free
+    branch: main
+
+    # pnpm is not on the default image, so corepack turns it on from the version in package.json.
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @aib/shared build && pnpm --filter @aib/server build
+    startCommand: node server/dist/index.js
+
+    healthCheckPath: /api/health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000 # Render's own port; the app reads it from the environment.
+
+      # Atlas connection string, including the database user's password.
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        value: aib_store
+
+      # The Vercel production URL. Cookies are issued for this origin.
+      - key: CLIENT_ORIGIN
+        sync: false
+
+      - key: CUSTOMER_JWT_SECRET
+        generateValue: true
+      - key: ADMIN_JWT_SECRET
+        generateValue: true
+
+      # Product images and invoice PDFs. Render's disk does not survive a deploy, so production uses the CDN.
+      - key: STORAGE_PROVIDER
+        value: cloudinary
+      - key: CLOUDINARY_URL
+        sync: false
+
+      # Outgoing email. Without these the mailer writes to disk and nothing reaches a customer.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 465
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+
+      - key: LOG_LEVEL
+        value: info

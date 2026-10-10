@@ -45,15 +45,30 @@ export async function runAutoCancel(now: Date = new Date()): Promise<string[]> {
   return cancelled;
 }
 
-/** Starts the sweep and returns a stop function, so a shutdown can clear it. */
+/**
+ * Starts the sweep and returns a stop function, so a shutdown can clear it.
+ *
+ * It sweeps **on boot as well as on the timer**, because the free hosting tier puts the service to sleep when
+ * nobody is using it. A machine that slept for nine hours has nine hours of intervals that never fired, and
+ * the first request after waking is the only chance to catch up (Batch 3 Part H.1).
+ */
 export function startAutoCancelJob(): () => void {
-  const timer = setInterval(() => {
+  const sweep = () => {
     void runAutoCancel().catch((error: unknown) => {
       logger.error({ err: error }, "The auto-cancel sweep failed");
     });
-  }, EVERY_MS);
+  };
+
+  // Not immediately: the database connection has just opened and the first request matters more.
+  const first = setTimeout(sweep, 20_000);
+  first.unref();
+
+  const timer = setInterval(sweep, EVERY_MS);
 
   // An interval must never be the reason the process refuses to exit.
   timer.unref();
-  return () => clearInterval(timer);
+  return () => {
+    clearTimeout(first);
+    clearInterval(timer);
+  };
 }

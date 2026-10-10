@@ -29,9 +29,11 @@ const nextConfig: NextConfig = {
 
   images: {
     // Product images come through the rewrite above, so they are same-origin in the browser. Remote patterns
-    // are listed for the deployed case, where the API sits on its own host.
+    // are listed for the deployed case, where the API sits on its own host and uploads live on the CDN.
     remotePatterns: [
       { protocol: "http", hostname: "localhost", port: "4000", pathname: "/uploads/**" },
+      // Cloudinary in production (Batch 3 Part H.1). The cloud name is part of the path, not the host.
+      { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
       ...(process.env.API_ORIGIN
         ? [
             {

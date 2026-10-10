@@ -11,6 +11,7 @@ import type mongoose from "mongoose";
 import { env } from "../config/env.js";
 import { connectDatabase, disconnectDatabase } from "../db.js";
 import { parseNairaToKobo } from "@aib/shared";
+import { logger } from "../lib/logger.js";
 import { buildSku, suggestModelCode } from "../lib/sku.js";
 import { slugify } from "../lib/slug.js";
 import { Brand, Category, Counter, Product, Setting } from "../models/index.js";
@@ -153,8 +154,19 @@ export async function seedCatalogue(): Promise<{ categories: number; brands: num
 }
 
 async function main(): Promise<void> {
+  /**
+   * The lab needs demo data on the live site, so production is not a flat refusal — but it is deliberately
+   * awkward: `ALLOW_DEMO_SEED=true` has to be set on purpose, and it is never set by a deploy. Running this
+   * against a real shop would replace its catalogue (Batch 3 Part H.1).
+   */
   if (env.NODE_ENV === "production") {
-    throw new Error("The seed refuses to run with NODE_ENV=production.");
+    if (!env.ALLOW_DEMO_SEED) {
+      throw new Error(
+        "The seed refuses to run against production. It replaces the catalogue, the customers and the order " +
+          "history. If this really is the lab's demo deployment, set ALLOW_DEMO_SEED=true and run it again.",
+      );
+    }
+    logger.warn("Seeding a PRODUCTION database because ALLOW_DEMO_SEED=true. Everything will be replaced.");
   }
 
   await connectDatabase();
