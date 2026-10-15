@@ -327,27 +327,18 @@ export async function buildDashboard(
 ): Promise<Dashboard> {
   const { key, label, current, previous } = resolvePeriod(query);
 
-  const [
-    awaiting,
-    toFulfilNow,
-    toFulfilBefore,
-    units,
-    unitsBefore,
-    lowCount,
-    low,
-    statuses,
-    recent,
-  ] = await Promise.all([
-    awaitingNow(),
-    toFulfilCount(),
-    toFulfilCount(previous),
-    unitsSold(current),
-    unitsSold(previous),
-    lowStockCount(options.lowStockThreshold),
-    lowStock(options.lowStockThreshold),
-    ordersByStatus(current),
-    recentOrders(),
-  ]);
+  const [awaiting, toFulfilNow, toFulfilBefore, units, unitsBefore, lowCount, low, statuses, recent] =
+    await Promise.all([
+      awaitingNow(),
+      toFulfilCount(),
+      toFulfilCount(previous),
+      unitsSold(current),
+      unitsSold(previous),
+      lowStockCount(options.lowStockThreshold),
+      lowStock(options.lowStockThreshold),
+      ordersByStatus(current),
+      recentOrders(),
+    ]);
 
   const operational: Dashboard["operational"] = {
     // A queue has no "previous": it is what is waiting right now, so the tile shows no delta.

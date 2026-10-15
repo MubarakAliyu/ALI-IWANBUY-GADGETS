@@ -151,6 +151,8 @@ export function ProductImages({
       )}
 
       <div className="flex items-center gap-3">
+        {/* Visually hidden rather than `hidden`, so it stays in the accessibility tree and can be reached —
+            which means it needs its own name, since the button beside it is what people actually click. */}
         <input
           ref={input}
           type="file"
@@ -158,6 +160,7 @@ export function ProductImages({
           multiple
           className="sr-only"
           id="product-images"
+          aria-label="Choose pictures to upload"
           onChange={(event) => void add(event.target.files)}
         />
         <Button

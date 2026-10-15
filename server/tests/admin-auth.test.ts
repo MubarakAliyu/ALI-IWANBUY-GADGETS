@@ -8,7 +8,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
 import { Admin } from "../src/models/index.js";
-import { ADMIN_PASSWORD, ADMIN_PIN, auditRows, clearAdmins, createAdmin, signedInAdmin } from "./admin-helpers.js";
+import {
+  ADMIN_PASSWORD,
+  ADMIN_PIN,
+  auditRows,
+  clearAdmins,
+  createAdmin,
+  signedInAdmin,
+} from "./admin-helpers.js";
 import { clearDatabase, seedFixture, seedSettings } from "./fixtures.js";
 import { agentFor } from "./helpers.js";
 
@@ -113,7 +120,11 @@ describe("requirePermission", () => {
   it("keeps staff away from the money entirely", async () => {
     const { agent } = await signedInAdmin(app, "STAFF", { pin: null });
 
-    for (const path of ["/api/v1/admin/payments", "/api/v1/admin/payments/awaiting", "/api/v1/admin/invoices"]) {
+    for (const path of [
+      "/api/v1/admin/payments",
+      "/api/v1/admin/payments/awaiting",
+      "/api/v1/admin/invoices",
+    ]) {
       expect((await agent.get(path)).status, path).toBe(403);
     }
   });

@@ -41,9 +41,7 @@ export async function signedInAdmin(
   const { id, email } = await createAdmin(role, overrides);
   const agent = agentFor(app);
 
-  const response = await agent
-    .post("/api/v1/admin/auth/login")
-    .send({ email, password: ADMIN_PASSWORD });
+  const response = await agent.post("/api/v1/admin/auth/login").send({ email, password: ADMIN_PASSWORD });
   if (response.status !== 200) {
     throw new Error(`Could not sign in an admin: ${response.status} ${JSON.stringify(response.body)}`);
   }

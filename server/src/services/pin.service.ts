@@ -150,7 +150,11 @@ export async function setPin(adminId: string, input: SetPinInput, req?: Request)
  * The owner clearing someone else's PIN — for an admin who has forgotten theirs. It is cleared, not chosen:
  * nobody, including the owner, ever knows another admin's PIN.
  */
-export async function resetPin(targetAdminId: string, actor: { id: string; name: string }, req?: Request): Promise<void> {
+export async function resetPin(
+  targetAdminId: string,
+  actor: { id: string; name: string },
+  req?: Request,
+): Promise<void> {
   const admin = await loadAdmin(targetAdminId);
 
   admin.pinHash = null;

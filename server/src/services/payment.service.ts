@@ -326,7 +326,13 @@ export async function refundOrder(
 
 /** The queue the payments page opens with: orders whose customers say they have paid. */
 export async function awaitingConfirmation(): Promise<
-  { orderNumber: string; customerName: string; totalKobo: number; placedAt: string; reference: string | null }[]
+  {
+    orderNumber: string;
+    customerName: string;
+    totalKobo: number;
+    placedAt: string;
+    reference: string | null;
+  }[]
 > {
   const orders = await Order.find({ status: "AWAITING_CONFIRMATION" })
     .sort({ placedAt: 1 })

@@ -205,7 +205,9 @@ function CancelDialog({
       setOpen(false);
       setReason("");
       setPin("");
-      toast.success(`${order.orderNumber} cancelled`, { description: "The stock has gone back on the shelf." });
+      toast.success(`${order.orderNumber} cancelled`, {
+        description: "The stock has gone back on the shelf.",
+      });
       onDone();
     } catch (caught) {
       setError(caught instanceof ApiRequestError ? caught.message : "We could not cancel that order.");

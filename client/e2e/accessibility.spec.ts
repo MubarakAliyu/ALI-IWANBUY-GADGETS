@@ -94,3 +94,43 @@ for (const target of SIGNED_IN_PAGES) {
     ).toEqual([]);
   });
 }
+
+/**
+ * The dashboard (Batch 3 Part G). A back office is used all day by the people who run the shop, so it gets
+ * the same standard as the storefront — including the product form, which is the longest form in the project
+ * and the one most likely to leave a control unlabelled.
+ */
+const ADMIN_PAGES = [
+  { name: "admin overview", path: "/admin", heading: "Overview" },
+  { name: "admin orders", path: "/admin/orders", heading: "Orders" },
+  { name: "admin product form", path: "/admin/products/new", heading: "New product" },
+];
+
+for (const target of ADMIN_PAGES) {
+  test(`${target.name} has no serious or critical accessibility violations`, async ({ page }) => {
+    test.setTimeout(120_000);
+
+    await page.goto("/admin/login");
+    await page.getByLabel("Work email").fill("owner@aliiwanbuy.com");
+    await page.getByLabel("Password", { exact: true }).fill("Owner12345");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible({ timeout: 60_000 });
+
+    await page.goto(target.path);
+    await expect(page.getByRole("heading", { name: target.heading })).toBeVisible({ timeout: 30_000 });
+
+    const results = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+      .analyze();
+
+    const serious = results.violations.filter(
+      (violation) => violation.impact === "serious" || violation.impact === "critical",
+    );
+
+    expect(
+      serious.map(
+        (violation) => `${violation.id}: ${violation.nodes.map((node) => node.target).join(" | ")}`,
+      ),
+    ).toEqual([]);
+  });
+}

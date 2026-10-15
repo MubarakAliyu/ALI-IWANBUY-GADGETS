@@ -128,21 +128,19 @@ export async function listAudit(query: AuditQuery): Promise<Paginated<AuditRow>>
   ]);
 
   return paginate(
-    rows.map(
-      (row): AuditRow => ({
-        id: row._id.toString(),
-        at: row.at.toISOString(),
-        actorType: row.actorType,
-        actorName: row.actorName,
-        actor: row.actor ? row.actor.toString() : null,
-        action: row.action,
-        entityType: row.entityType,
-        entityId: row.entityId,
-        summary: row.summary,
-        diff: row.diff,
-        ip: row.ip,
-      }),
-    ),
+    rows.map((row): AuditRow => ({
+      id: row._id.toString(),
+      at: row.at.toISOString(),
+      actorType: row.actorType,
+      actorName: row.actorName,
+      actor: row.actor ? row.actor.toString() : null,
+      action: row.action,
+      entityType: row.entityType,
+      entityId: row.entityId,
+      summary: row.summary,
+      diff: row.diff,
+      ip: row.ip,
+    })),
     total,
     page,
     limit,

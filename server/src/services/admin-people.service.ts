@@ -9,7 +9,13 @@
  *     because the dashboard hiding a button is not what stops it.
  */
 
-import { ADMIN_ROLE_LABEL, type AdminCustomerQuery, type AdminCustomerRow, type AdminRole, type CreateAdminInput } from "@aib/shared";
+import {
+  ADMIN_ROLE_LABEL,
+  type AdminCustomerQuery,
+  type AdminCustomerRow,
+  type AdminRole,
+  type CreateAdminInput,
+} from "@aib/shared";
 import type { Request } from "express";
 import { randomInt } from "node:crypto";
 import type { FilterQuery, Types } from "mongoose";

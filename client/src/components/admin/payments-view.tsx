@@ -21,9 +21,7 @@ const columns: DataTableColumn<PaymentRow>[] = [
   {
     id: "confirmedAt",
     header: "When",
-    cell: ({ row }) => (
-      <span className="whitespace-nowrap">{formatDateTime(row.original.confirmedAt)}</span>
-    ),
+    cell: ({ row }) => <span className="whitespace-nowrap">{formatDateTime(row.original.confirmedAt)}</span>,
   },
   {
     id: "orderNumber",
@@ -99,7 +97,7 @@ export function PaymentsView({
             {awaiting.map((row) => (
               <li
                 key={row.orderNumber}
-                className="grid content-start gap-3 rounded-lg border border-warning-border bg-warning-tint p-4"
+                className="border-warning-border grid content-start gap-3 rounded-lg border bg-warning-tint p-4"
               >
                 <div className="grid gap-0.5">
                   <Link
@@ -118,9 +116,7 @@ export function PaymentsView({
                   ) : null}
                 </div>
 
-                <p className="text-h3 font-bold text-brand-navy tabular-nums">
-                  {formatNaira(row.totalKobo)}
-                </p>
+                <p className="text-h3 font-bold text-brand-navy tabular-nums">{formatNaira(row.totalKobo)}</p>
 
                 {canConfirm ? (
                   <ConfirmPaymentDialog

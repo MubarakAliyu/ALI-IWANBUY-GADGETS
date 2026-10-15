@@ -38,13 +38,7 @@ export function requirePermission(permission: Permission) {
       req,
     });
 
-    next(
-      new AppError(
-        403,
-        "FORBIDDEN",
-        "Your role does not allow that. Ask the owner if you need access.",
-      ),
-    );
+    next(new AppError(403, "FORBIDDEN", "Your role does not allow that. Ask the owner if you need access."));
   };
 }
 

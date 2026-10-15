@@ -157,7 +157,11 @@ export function StockDialog({
                   {variant ? (
                     <>
                       {variant.stock} →{" "}
-                      <span className={after < 0 ? "font-semibold text-danger-text" : "font-semibold text-brand-navy"}>
+                      <span
+                        className={
+                          after < 0 ? "font-semibold text-danger-text" : "font-semibold text-brand-navy"
+                        }
+                      >
                         {after}
                       </span>
                     </>

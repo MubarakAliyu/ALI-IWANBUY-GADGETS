@@ -95,7 +95,7 @@ export function AdminUsers({ admins, currentId }: { admins: Admin[]; currentId: 
             key={admin.id}
             className="grid gap-3 rounded-lg border border-grey-200 bg-white p-4 sm:flex sm:items-center"
           >
-            <div className="min-w-0 flex-1 grid gap-0.5">
+            <div className="grid min-w-0 flex-1 gap-0.5">
               <span className="flex flex-wrap items-center gap-2">
                 <span className="font-semibold text-brand-navy">
                   {admin.firstName} {admin.lastName}
@@ -122,7 +122,7 @@ export function AdminUsers({ admins, currentId }: { admins: Admin[]; currentId: 
                 value={admin.role}
                 disabled={admin.id === currentId || busy === admin.id}
                 onChange={(event) => void changeRole(admin, event.target.value as AdminRole)}
-                className="h-9 rounded-md border border-grey-200 bg-white px-2 text-body-sm text-brand-navy disabled:bg-grey-100 disabled:text-grey-500 focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none"
+                className="h-9 rounded-md border border-grey-200 bg-white px-2 text-body-sm text-brand-navy focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none disabled:bg-grey-100 disabled:text-grey-500"
               >
                 {ADMIN_ROLES.map((role) => (
                   <option key={role} value={role}>
@@ -307,7 +307,7 @@ function SecretDialog({
         </DialogHeader>
 
         <div className="flex items-center gap-3 rounded-md border border-grey-200 bg-grey-50 p-4">
-          <code className="flex-1 font-mono text-h3 tracking-wide text-brand-navy">{secret?.password}</code>
+          <code className="font-mono flex-1 text-h3 tracking-wide text-brand-navy">{secret?.password}</code>
           <Button variant="outline" onClick={() => void copy()}>
             {copied ? (
               <>

@@ -51,7 +51,12 @@ export async function bulkStatus(req: Request, res: Response): Promise<void> {
 
 export async function adjustStock(req: Request, res: Response): Promise<void> {
   res.json(
-    await products.adjustStock(String(req.params.id), validated<StockAdjustInput>(res), currentAdmin(req), req),
+    await products.adjustStock(
+      String(req.params.id),
+      validated<StockAdjustInput>(res),
+      currentAdmin(req),
+      req,
+    ),
   );
 }
 

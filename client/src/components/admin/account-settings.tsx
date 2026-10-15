@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import type { Admin } from "@aib/shared";
-import { ADMIN_ROLE_DESCRIPTION, ADMIN_ROLE_LABEL, adminProfileSchema, type AdminProfileInput } from "@aib/shared";
+import {
+  ADMIN_ROLE_DESCRIPTION,
+  ADMIN_ROLE_LABEL,
+  adminProfileSchema,
+  type AdminProfileInput,
+} from "@aib/shared";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -11,12 +16,7 @@ import { LockKeyholeIcon } from "lucide-react";
 import { ChoosePasswordForm } from "@/components/admin/choose-password-form";
 import { SetPinForm } from "@/components/admin/set-pin-form";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { updateAdminProfile } from "@/lib/admin";
@@ -71,7 +71,12 @@ export function AccountSettings({ admin }: { admin: Admin }) {
             {(control) => <Input {...control} value={admin.email} readOnly disabled />}
           </Field>
 
-          <Button type="submit" className="w-fit" loading={form.formState.isSubmitting} loadingLabel="Saving…">
+          <Button
+            type="submit"
+            className="w-fit"
+            loading={form.formState.isSubmitting}
+            loadingLabel="Saving…"
+          >
             Save my details
           </Button>
         </form>

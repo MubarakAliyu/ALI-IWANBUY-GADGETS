@@ -111,14 +111,7 @@ export function ProductsTable({
         <span className="flex items-center gap-3">
           <span className="relative size-10 shrink-0 overflow-hidden rounded-md bg-grey-100">
             {row.original.image ? (
-              <Image
-                src={row.original.image}
-                alt=""
-                fill
-                sizes="40px"
-                className="object-cover"
-                unoptimized
-              />
+              <Image src={row.original.image} alt="" fill sizes="40px" className="object-cover" unoptimized />
             ) : null}
           </span>
           <span className="grid min-w-0">
@@ -245,9 +238,7 @@ export function ProductsTable({
           aria-label="Bulk actions"
           className="flex flex-wrap items-center gap-3 rounded-lg border border-primary-200 bg-primary-50 px-4 py-3"
         >
-          <p className="text-body-sm font-semibold text-brand-navy">
-            {selected.size} selected on this page
-          </p>
+          <p className="text-body-sm font-semibold text-brand-navy">{selected.size} selected on this page</p>
           <div className="ml-auto flex gap-2">
             <Button size="sm" variant="outline" loading={busy} onClick={() => void applyStatus("ACTIVE")}>
               <EyeIcon aria-hidden="true" className="size-4" />

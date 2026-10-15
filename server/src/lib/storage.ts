@@ -37,7 +37,11 @@ const ROOT = path.resolve(process.cwd(), env.UPLOAD_DIR);
 
 /** A name that cannot collide and cannot escape its folder, keeping the caller's extension. */
 export function safeFilename(original: string): string {
-  const extension = path.extname(original).toLowerCase().replace(/[^.a-z0-9]/g, "") || ".bin";
+  const extension =
+    path
+      .extname(original)
+      .toLowerCase()
+      .replace(/[^.a-z0-9]/g, "") || ".bin";
   return `${Date.now().toString(36)}-${randomBytes(6).toString("hex")}${extension}`;
 }
 

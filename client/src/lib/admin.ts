@@ -361,8 +361,7 @@ export async function uploadImage(
   });
 
   const payload = (await response.json()) as
-    | { url: string; width: number; height: number }
-    | { error: { message: string } };
+    { url: string; width: number; height: number } | { error: { message: string } };
 
   if (!response.ok) {
     throw new Error("error" in payload ? payload.error.message : "That image could not be uploaded.");

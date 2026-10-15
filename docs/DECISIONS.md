@@ -127,3 +127,23 @@ time someone asks for it and then kept. Rendering inside the transaction would h
 and seeding sixty historical orders would otherwise mean drawing sixty documents nobody opens. If the stored
 file goes missing the renderer simply draws it again, since everything it prints comes from the order snapshot
 and Store Settings.
+
+**ADR-022 · 10 Oct 2026 · Chart containers are `inert`, not merely `aria-hidden`.** Each recharts container
+was marked `aria-hidden` with a visually hidden table beside it carrying the same figures. axe found the hole:
+recharts wraps its SVG in a focusable element, so a keyboard user could tab onto something a screen reader had
+been told did not exist — a WCAG failure, and a confusing one. The containers are now `aria-hidden` **and**
+`inert`, which takes the whole subtree out of the tab order, leaving the table as the one version that is
+announced. Found by adding the dashboard to the axe suite rather than by reading the code.
+
+**ADR-023 · 10 Oct 2026 · The admin menu button carries its own label.** Below `sm` the button's name block is
+hidden and its avatar is decorative, which left the trigger with no accessible name at all on a phone — found
+by running axe at the Pixel 7 viewport, where the desktop run was clean. It now has an explicit `aria-label`.
+The general lesson is recorded here because it will happen again: a control whose name comes from content that
+a breakpoint hides has no name at that breakpoint.
+
+**ADR-024 · 10 Oct 2026 · "Visible on the storefront" is proven on the product's own page.** The end-to-end
+test for creating a product first asserted it appeared in `/search`. That fails against a production build and
+should: catalogue listings are statically rendered and revalidate every 60 seconds (ADR-011), so a product
+created a second ago is legitimately not in them. A new product's own page has no cached copy and is rendered
+on demand, so it is there immediately — which is the claim worth testing. The listing catches up within the
+minute, which is the documented behaviour rather than a defect.

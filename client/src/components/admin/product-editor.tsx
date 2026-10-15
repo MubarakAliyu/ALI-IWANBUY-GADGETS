@@ -143,9 +143,7 @@ export function ProductEditor({
     } catch (caught) {
       if (caught instanceof ApiRequestError) {
         setError(caught.message);
-        setFieldErrors(
-          Object.fromEntries((caught.fields ?? []).map((field) => [field.path, field.message])),
-        );
+        setFieldErrors(Object.fromEntries((caught.fields ?? []).map((field) => [field.path, field.message])));
       } else {
         setError("We could not save that. Please try again.");
       }
@@ -251,7 +249,7 @@ export function ProductEditor({
               value={specs}
               rows={5}
               onChange={(event) => touch(setSpecs)(event.target.value)}
-              className="rounded-md border border-grey-200 bg-white px-3 py-2 font-mono text-body-sm text-brand-navy focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none"
+              className="font-mono rounded-md border border-grey-200 bg-white px-3 py-2 text-body-sm text-brand-navy focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none"
             />
           )}
         </Field>
@@ -333,7 +331,11 @@ export function ProductEditor({
             )}
           </Field>
 
-          <Field label="Tags" hint="Comma separated — used by search and the filter chips." className="sm:col-span-2">
+          <Field
+            label="Tags"
+            hint="Comma separated — used by search and the filter chips."
+            className="sm:col-span-2"
+          >
             {(control) => (
               <Input
                 {...control}

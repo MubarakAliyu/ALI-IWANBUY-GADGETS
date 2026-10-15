@@ -144,7 +144,15 @@ export default async function DashboardPage({
   );
 }
 
-function Panel({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
+function Panel({
+  title,
+  action,
+  children,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <section className="grid content-start gap-3 rounded-lg border border-grey-200 bg-white p-4">
       <div className="flex items-center justify-between gap-3">
@@ -172,7 +180,7 @@ function RecentOrders({ orders }: { orders: Dashboard["operational"]["recentOrde
         <ul className="divide-y divide-grey-200">
           {orders.map((order) => (
             <li key={order.orderNumber} className="flex items-center justify-between gap-3 py-2.5">
-              <div className="min-w-0 grid">
+              <div className="grid min-w-0">
                 <Link
                   href={`/admin/orders/${order.orderNumber}`}
                   className="truncate text-body-sm font-semibold text-brand-navy hover:text-brand-primary"
@@ -202,7 +210,10 @@ function LowStock({ items }: { items: Dashboard["operational"]["lowStock"] }) {
     <Panel
       title="Running low"
       action={
-        <Link href="/admin/products" className="text-caption font-semibold text-brand-primary hover:underline">
+        <Link
+          href="/admin/products"
+          className="text-caption font-semibold text-brand-primary hover:underline"
+        >
           Products
         </Link>
       }
@@ -213,7 +224,7 @@ function LowStock({ items }: { items: Dashboard["operational"]["lowStock"] }) {
         <ul className="divide-y divide-grey-200">
           {items.map((item) => (
             <li key={item.sku} className="flex items-center justify-between gap-3 py-2.5">
-              <div className="min-w-0 grid">
+              <div className="grid min-w-0">
                 <span className="truncate text-body-sm font-semibold text-brand-navy">{item.name}</span>
                 <span className="truncate text-caption text-text-muted">
                   {item.variantLabel} · {item.sku}
@@ -234,11 +245,7 @@ function LowStock({ items }: { items: Dashboard["operational"]["lowStock"] }) {
   );
 }
 
-function TopProducts({
-  products,
-}: {
-  products: NonNullable<Dashboard["financial"]>["topProducts"];
-}) {
+function TopProducts({ products }: { products: NonNullable<Dashboard["financial"]>["topProducts"] }) {
   const best = products[0]?.revenueKobo ?? 0;
 
   return (

@@ -35,8 +35,20 @@ const DEMO_OWNER_PIN = "8426";
 const DEMO_MANAGER_PIN = "5193";
 
 export const DEMO_ADMINS = [
-  { firstName: "Ali", lastName: "Abdullahi", email: "owner@aliiwanbuy.com", role: "OWNER", pin: DEMO_OWNER_PIN },
-  { firstName: "Hauwa", lastName: "Sani", email: "manager@aliiwanbuy.com", role: "MANAGER", pin: DEMO_MANAGER_PIN },
+  {
+    firstName: "Ali",
+    lastName: "Abdullahi",
+    email: "owner@aliiwanbuy.com",
+    role: "OWNER",
+    pin: DEMO_OWNER_PIN,
+  },
+  {
+    firstName: "Hauwa",
+    lastName: "Sani",
+    email: "manager@aliiwanbuy.com",
+    role: "MANAGER",
+    pin: DEMO_MANAGER_PIN,
+  },
   { firstName: "Yusuf", lastName: "Garba", email: "staff@aliiwanbuy.com", role: "STAFF", pin: null },
 ] as const;
 
@@ -174,7 +186,9 @@ export async function seedOrderHistory(options: {
   for (let index = 0; index < count; index += 1) {
     // Spread the orders across the window, with the most recent few days a little busier.
     const age = Math.floor(next() ** 1.4 * days);
-    const placedAt = new Date(Date.now() - age * 24 * 60 * 60 * 1000 - Math.floor(next() * 12) * 60 * 60 * 1000);
+    const placedAt = new Date(
+      Date.now() - age * 24 * 60 * 60 * 1000 - Math.floor(next() * 12) * 60 * 60 * 1000,
+    );
 
     const customer = pick(next, customers);
     const outcome = weightedStatus(next);
@@ -186,7 +200,10 @@ export async function seedOrderHistory(options: {
 
     for (let line = 0; line < lineCount; line += 1) {
       const product = pick(next, products);
-      const variant = pick(next, product.variants.filter((candidate) => candidate.isActive));
+      const variant = pick(
+        next,
+        product.variants.filter((candidate) => candidate.isActive),
+      );
       if (!variant || items.some((item) => item.variantId.equals(variant._id))) {
         continue;
       }
@@ -259,7 +276,11 @@ export async function seedOrderHistory(options: {
         note: "Payment confirmed",
       });
     }
-    if (outcome.status !== "PAID" && outcome.status !== "PENDING_PAYMENT" && outcome.status !== "AWAITING_CONFIRMATION") {
+    if (
+      outcome.status !== "PAID" &&
+      outcome.status !== "PENDING_PAYMENT" &&
+      outcome.status !== "AWAITING_CONFIRMATION"
+    ) {
       history.push({
         status: outcome.status,
         at: new Date(placedAt.getTime() + 26 * 60 * 60 * 1000),
@@ -292,7 +313,14 @@ export async function seedOrderHistory(options: {
               landmark: "",
             },
       paymentMethod,
-      paymentStatus: outcome.status === "REFUNDED" ? "REFUNDED" : outcome.paid ? "PAID" : outcome.status === "AWAITING_CONFIRMATION" ? "AWAITING_CONFIRMATION" : "UNPAID",
+      paymentStatus:
+        outcome.status === "REFUNDED"
+          ? "REFUNDED"
+          : outcome.paid
+            ? "PAID"
+            : outcome.status === "AWAITING_CONFIRMATION"
+              ? "AWAITING_CONFIRMATION"
+              : "UNPAID",
       status: outcome.status,
       note: null,
       cancelledReason: outcome.status === "CANCELLED" ? "Changed my mind" : null,

@@ -48,8 +48,8 @@ export function ChoosePasswordForm() {
         </p>
         <h1 className="text-h1 text-brand-navy">Choose your own password</h1>
         <p className="text-body-sm text-text-muted">
-          You are signed in with the password the owner set up. Choose one only you know — everything you do in
-          the dashboard is recorded against your name.
+          You are signed in with the password the owner set up. Choose one only you know — everything you do
+          in the dashboard is recorded against your name.
         </p>
       </div>
 

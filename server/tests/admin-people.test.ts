@@ -179,9 +179,9 @@ describe("admin users", () => {
       role: "OWNER" as const,
     };
 
-    await expect(
-      updateAdminRole(ownerId, "MANAGER", pretendCaller as never),
-    ).rejects.toMatchObject({ code: "LAST_OWNER" });
+    await expect(updateAdminRole(ownerId, "MANAGER", pretendCaller as never)).rejects.toMatchObject({
+      code: "LAST_OWNER",
+    });
 
     await expect(setAdminStatus(ownerId, "SUSPENDED", pretendCaller as never)).rejects.toMatchObject({
       code: "LAST_OWNER",
@@ -364,7 +364,8 @@ describe("every admin mutation writes an audit row", () => {
       },
       {
         name: "category create",
-        run: () => owner.post("/api/v1/admin/categories").send({ name: "Sweep", sortOrder: 9, isActive: true }),
+        run: () =>
+          owner.post("/api/v1/admin/categories").send({ name: "Sweep", sortOrder: 9, isActive: true }),
       },
       {
         name: "category reorder",
@@ -434,7 +435,8 @@ describe("every admin mutation writes an audit row", () => {
       },
       {
         name: "bulk status",
-        run: () => owner.post("/api/v1/admin/products/bulk-status").send({ ids: [product.id], status: "ACTIVE" }),
+        run: () =>
+          owner.post("/api/v1/admin/products/bulk-status").send({ ids: [product.id], status: "ACTIVE" }),
       },
       {
         name: "stock adjust",

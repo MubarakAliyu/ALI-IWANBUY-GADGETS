@@ -244,7 +244,9 @@ describe("cancelling and refunding", () => {
     expect(response.body.paymentStatus).toBe("REFUNDED");
     expect(await stockOf("oraimo-freepods-4")).toBe(before);
 
-    const refund = await Payment.findOne({ status: "REFUNDED", refundOf: { $ne: null } }).lean().exec();
+    const refund = await Payment.findOne({ status: "REFUNDED", refundOf: { $ne: null } })
+      .lean()
+      .exec();
     expect(refund?.amountKobo).toBe(-totalKobo);
 
     expect(await auditRows("ORDER_REFUNDED")).toHaveLength(1);

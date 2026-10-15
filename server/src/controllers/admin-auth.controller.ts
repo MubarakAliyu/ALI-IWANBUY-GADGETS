@@ -2,12 +2,7 @@
  * Admin sessions and the account each admin manages for themselves, over HTTP.
  */
 
-import type {
-  AdminChangePasswordInput,
-  AdminLoginInput,
-  AdminProfileInput,
-  SetPinInput,
-} from "@aib/shared";
+import type { AdminChangePasswordInput, AdminLoginInput, AdminProfileInput, SetPinInput } from "@aib/shared";
 import type { Request, Response } from "express";
 import { clearAdminCookie, setAdminCookie } from "../lib/tokens.js";
 import { currentAdmin, readAdmin } from "../middleware/require-admin.js";

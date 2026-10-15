@@ -49,9 +49,7 @@ export function SettingsForm({ settings }: { settings: StoreSettings }) {
     } catch (caught) {
       if (caught instanceof ApiRequestError) {
         setError(caught.message);
-        setFieldErrors(
-          Object.fromEntries((caught.fields ?? []).map((field) => [field.path, field.message])),
-        );
+        setFieldErrors(Object.fromEntries((caught.fields ?? []).map((field) => [field.path, field.message])));
       } else {
         setError("We could not save those settings.");
       }
@@ -74,8 +72,18 @@ export function SettingsForm({ settings }: { settings: StoreSettings }) {
 
       <Section title="Business" description="What the law and the invoice call the company.">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Text label="Shop name" value={values.storeName} error={fieldErrors.storeName} onChange={(v) => set("storeName", v)} />
-          <Text label="Registered name" value={values.legalName} error={fieldErrors.legalName} onChange={(v) => set("legalName", v)} />
+          <Text
+            label="Shop name"
+            value={values.storeName}
+            error={fieldErrors.storeName}
+            onChange={(v) => set("storeName", v)}
+          />
+          <Text
+            label="Registered name"
+            value={values.legalName}
+            error={fieldErrors.legalName}
+            onChange={(v) => set("legalName", v)}
+          />
           <Text label="RC number" value={values.rcNumber} onChange={(v) => set("rcNumber", v)} />
           <Text label="TIN" value={values.tin} onChange={(v) => set("tin", v)} />
           <Text
@@ -99,9 +107,24 @@ export function SettingsForm({ settings }: { settings: StoreSettings }) {
 
       <Section title="Contact" description="Shown in the storefront header, footer and contact page.">
         <div className="grid gap-4 sm:grid-cols-3">
-          <Text label="Phone" value={values.phone} error={fieldErrors.phone} onChange={(v) => set("phone", v)} />
-          <Text label="WhatsApp" value={values.whatsapp} error={fieldErrors.whatsapp} onChange={(v) => set("whatsapp", v)} />
-          <Text label="Email" value={values.email} error={fieldErrors.email} onChange={(v) => set("email", v)} />
+          <Text
+            label="Phone"
+            value={values.phone}
+            error={fieldErrors.phone}
+            onChange={(v) => set("phone", v)}
+          />
+          <Text
+            label="WhatsApp"
+            value={values.whatsapp}
+            error={fieldErrors.whatsapp}
+            onChange={(v) => set("whatsapp", v)}
+          />
+          <Text
+            label="Email"
+            value={values.email}
+            error={fieldErrors.email}
+            onChange={(v) => set("email", v)}
+          />
         </div>
       </Section>
 
@@ -150,7 +173,10 @@ export function SettingsForm({ settings }: { settings: StoreSettings }) {
         </div>
       </Section>
 
-      <Section title="Orders" description="How the shop behaves when nobody pays, and when to warn about stock.">
+      <Section
+        title="Orders"
+        description="How the shop behaves when nobody pays, and when to warn about stock."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <Number
             label="Cancel unpaid orders after (hours)"

@@ -154,8 +154,7 @@ export function DataTable<T>({
                         key={cell.id}
                         className={cn(
                           "px-4 py-3 text-body-sm text-brand-navy",
-                          (cell.column.columnDef as DataTableColumn<T>).numeric &&
-                            "text-right tabular-nums",
+                          (cell.column.columnDef as DataTableColumn<T>).numeric && "text-right tabular-nums",
                         )}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

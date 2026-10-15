@@ -53,7 +53,10 @@ export async function adminLogin(input: AdminLoginInput, req?: Request): Promise
   const admin = await Admin.findOne({ email: input.email }).exec();
 
   if (!admin) {
-    await verifyPassword(input.password, "$2b$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv");
+    await verifyPassword(
+      input.password,
+      "$2b$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv",
+    );
     await recordAudit({
       actorType: "SYSTEM",
       action: "ADMIN_LOGIN_FAILED",

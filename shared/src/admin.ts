@@ -648,7 +648,10 @@ export const storeSettingsSchema = z.object({
   bank: z.object({
     bankName: z.string().trim().max(60),
     accountName: z.string().trim().max(80),
-    accountNumber: z.string().trim().regex(/^\d{0,12}$/, "Digits only"),
+    accountNumber: z
+      .string()
+      .trim()
+      .regex(/^\d{0,12}$/, "Digits only"),
   }),
   openingHours: z
     .array(

@@ -61,7 +61,9 @@ export function InvoicesTable({
       const result = await sendInvoice(invoice.invoiceNumber);
       toast.success(`Sent to ${result.sentTo}`, {
         description:
-          result.sentCount === 1 ? "First time this invoice has gone out." : `Sent ${result.sentCount} times now.`,
+          result.sentCount === 1
+            ? "First time this invoice has gone out."
+            : `Sent ${result.sentCount} times now.`,
       });
       router.refresh();
     } catch (error) {

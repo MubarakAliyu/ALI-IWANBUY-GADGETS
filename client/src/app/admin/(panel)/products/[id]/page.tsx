@@ -4,11 +4,7 @@ import { ProductEditor } from "@/components/admin/product-editor";
 import { getAdminProduct, listAdminBrands, listAdminCategories } from "@/lib/admin";
 import { ApiRequestError } from "@/lib/api";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const product = await getAdminProduct(id).catch(() => null);
   return { title: product?.name ?? "Product" };

@@ -191,11 +191,15 @@ async function main(): Promise<void> {
   console.log(`    images      server/${env.UPLOAD_DIR}/seed`);
   console.log(`    admins      ${admins.length}`);
   console.log(`    customers   ${customers.length}`);
-  console.log(`    orders      ${history.orders} (${history.payments} payments, ${history.invoices} invoices)`);
+  console.log(
+    `    orders      ${history.orders} (${history.payments} payments, ${history.invoices} invoices)`,
+  );
   console.log("");
   console.log("  Demo sign-ins — also written to docs/DEMO-ACCOUNTS.md:");
   for (const admin of DEMO_ADMINS) {
-    console.log(`    ${admin.role.padEnd(8)} ${admin.email.padEnd(28)} ${DEMO_ADMIN_PASSWORD}${admin.pin ? `  PIN ${admin.pin}` : ""}`);
+    console.log(
+      `    ${admin.role.padEnd(8)} ${admin.email.padEnd(28)} ${DEMO_ADMIN_PASSWORD}${admin.pin ? `  PIN ${admin.pin}` : ""}`,
+    );
   }
   console.log(`    CUSTOMER amina@example.com           ${DEMO_CUSTOMER_PASSWORD}`);
   console.log("");

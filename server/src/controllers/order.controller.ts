@@ -73,10 +73,7 @@ export async function cancelOrder(req: Request, res: Response): Promise<void> {
  */
 export async function downloadInvoice(req: Request, res: Response): Promise<void> {
   const customer = currentCustomer(req);
-  const { invoice, pdf } = await getCustomerInvoicePdf(
-    customer._id.toString(),
-    String(req.params.number),
-  );
+  const { invoice, pdf } = await getCustomerInvoicePdf(customer._id.toString(), String(req.params.number));
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", `attachment; filename="${invoice.invoiceNumber}.pdf"`);

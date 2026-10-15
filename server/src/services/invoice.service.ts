@@ -74,10 +74,7 @@ async function logoPng(): Promise<Buffer | null> {
     // The horizontal **white** lockup, because the band it sits on is navy — the dark lockup disappears
     // against it. Same asset the admin sidebar head uses (`logoManifest.horizontalWhite`).
     const svg = await readFile(path.join(BRAND_DIR, "logo", "svg", "logo-new-a-1.svg"));
-    const png = await sharp(svg, { density: 300 })
-      .resize({ width: 647 })
-      .png()
-      .toBuffer();
+    const png = await sharp(svg, { density: 300 }).resize({ width: 647 }).png().toBuffer();
     await mkdir(INVOICE_DIR, { recursive: true });
     await writeFile(LOGO_PNG, png);
     return png;
@@ -145,7 +142,11 @@ function draw(doc: PDFKit.PDFDocument, data: InvoiceData, logo: Buffer | null): 
 
   // ── Dates, opposite ───────────────────────────────────────────────────────────────────────────────
   const rightX = PAGE_WIDTH - PAGE_MARGIN - 180;
-  doc.font("regular").fontSize(9).fillColor(GREY).text("Invoice date", rightX, 144, { width: 180, align: "right" });
+  doc
+    .font("regular")
+    .fontSize(9)
+    .fillColor(GREY)
+    .text("Invoice date", rightX, 144, { width: 180, align: "right" });
   doc
     .font("semibold")
     .fontSize(10)
@@ -157,7 +158,11 @@ function draw(doc: PDFKit.PDFDocument, data: InvoiceData, logo: Buffer | null): 
     .fontSize(10)
     .fillColor(NAVY)
     .text(order.orderNumber, rightX, 188, { width: 180, align: "right" });
-  doc.font("regular").fontSize(9).fillColor(GREY).text("Order date", rightX, 208, { width: 180, align: "right" });
+  doc
+    .font("regular")
+    .fontSize(9)
+    .fillColor(GREY)
+    .text("Order date", rightX, 208, { width: 180, align: "right" });
   doc
     .font("semibold")
     .fontSize(10)
@@ -217,11 +222,15 @@ function draw(doc: PDFKit.PDFDocument, data: InvoiceData, logo: Buffer | null): 
     }
 
     // One line per cell: without `lineBreak: false` a long product name wraps and spills into the next row.
-    doc.font("semibold").fontSize(9.5).fillColor(NAVY).text(item.name, columns.item + 8, tableY + 6, {
-      width: 262,
-      lineBreak: false,
-      ellipsis: true,
-    });
+    doc
+      .font("semibold")
+      .fontSize(9.5)
+      .fillColor(NAVY)
+      .text(item.name, columns.item + 8, tableY + 6, {
+        width: 262,
+        lineBreak: false,
+        ellipsis: true,
+      });
     doc
       .font("regular")
       .fontSize(8)
@@ -241,7 +250,11 @@ function draw(doc: PDFKit.PDFDocument, data: InvoiceData, logo: Buffer | null): 
     });
 
     tableY += ROW_HEIGHT;
-    doc.moveTo(PAGE_MARGIN, tableY).lineTo(PAGE_WIDTH - PAGE_MARGIN, tableY).lineWidth(0.5).stroke(GREY_LINE);
+    doc
+      .moveTo(PAGE_MARGIN, tableY)
+      .lineTo(PAGE_WIDTH - PAGE_MARGIN, tableY)
+      .lineWidth(0.5)
+      .stroke(GREY_LINE);
   }
 
   // ── Totals ────────────────────────────────────────────────────────────────────────────────────────
@@ -277,9 +290,13 @@ function draw(doc: PDFKit.PDFDocument, data: InvoiceData, logo: Buffer | null): 
   const boxHeight = 68 + (data.reference ? 14 : 0) + (bank ? 16 : 0);
 
   doc.rect(PAGE_MARGIN, payY, CONTENT_WIDTH, boxHeight).fill(GREY_BG);
-  doc.font("medium").fontSize(9).fillColor(GREY).text("PAYMENT", PAGE_MARGIN + 12, payY + 12, {
-    characterSpacing: 1,
-  });
+  doc
+    .font("medium")
+    .fontSize(9)
+    .fillColor(GREY)
+    .text("PAYMENT", PAGE_MARGIN + 12, payY + 12, {
+      characterSpacing: 1,
+    });
 
   const paid = order.paymentStatus === "PAID";
   doc
@@ -322,7 +339,11 @@ async function render(data: InvoiceData): Promise<Buffer> {
   const logo = await logoPng();
 
   return new Promise<Buffer>((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: PAGE_MARGIN, info: { Title: data.invoice.invoiceNumber } });
+    const doc = new PDFDocument({
+      size: "A4",
+      margin: PAGE_MARGIN,
+      info: { Title: data.invoice.invoiceNumber },
+    });
     const chunks: Buffer[] = [];
 
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -452,9 +473,11 @@ export async function listInvoices(query: InvoiceQuery): Promise<Paginated<Invoi
 
   const rows = invoices.map((invoice): InvoiceRow => {
     const order = invoice.order as unknown as { orderNumber?: string } | null;
-    const customer = invoice.customer as unknown as
-      | { firstName?: string; lastName?: string; email?: string }
-      | null;
+    const customer = invoice.customer as unknown as {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+    } | null;
     const issuer = invoice.issuedBy as unknown as { firstName?: string; lastName?: string } | null;
     const lastSent = invoice.sentAt.at(-1) ?? null;
 

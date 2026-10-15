@@ -103,22 +103,22 @@ Render URL is never typed into a browser except to check `/api/health`.
 
 ### What goes where
 
-| Variable               | Render (API) | Vercel (client) | Notes                                               |
-| ---------------------- | ------------ | --------------- | --------------------------------------------------- |
-| `NODE_ENV`             | `production` | set by Vercel   |                                                       |
-| `PORT`                 | `10000`      | —               | Render's own port.                                    |
-| `MONGODB_URI`          | ✅ secret    | —               | Atlas connection string, with the user's password.     |
-| `MONGODB_DB_NAME`      | `aib_store`  | —               |                                                       |
-| `CLIENT_ORIGIN`        | ✅           | —               | The Vercel production URL. Cookies are issued for it.  |
-| `CUSTOMER_JWT_SECRET`  | ✅ secret    | —               | `render.yaml` generates one.                          |
-| `ADMIN_JWT_SECRET`     | ✅ secret    | —               | `render.yaml` generates one.                          |
-| `STORAGE_PROVIDER`     | `cloudinary` | —               | Render's disk is wiped on every deploy.               |
-| `CLOUDINARY_URL`       | ✅ secret    | —               | `cloudinary://KEY:SECRET@CLOUD_NAME`.                 |
-| `SMTP_*`               | ✅ secret    | —               | Without these, email is written to disk and lost.      |
-| `MAIL_FROM`            | ✅           | —               | Must match the SMTP account's verified sender.         |
-| `COOKIE_SAMESITE`      | `lax`        | —               | Only change if you drop the rewrites — see below.      |
-| `ALLOW_DEMO_SEED`      | unset        | —               | Set to `true` by hand, once, to seed the demo site.    |
-| `API_ORIGIN`           | —            | ✅              | The Render URL. Used by the rewrites and SSR fetches.  |
+| Variable              | Render (API) | Vercel (client) | Notes                                                 |
+| --------------------- | ------------ | --------------- | ----------------------------------------------------- |
+| `NODE_ENV`            | `production` | set by Vercel   |                                                       |
+| `PORT`                | `10000`      | —               | Render's own port.                                    |
+| `MONGODB_URI`         | ✅ secret    | —               | Atlas connection string, with the user's password.    |
+| `MONGODB_DB_NAME`     | `aib_store`  | —               |                                                       |
+| `CLIENT_ORIGIN`       | ✅           | —               | The Vercel production URL. Cookies are issued for it. |
+| `CUSTOMER_JWT_SECRET` | ✅ secret    | —               | `render.yaml` generates one.                          |
+| `ADMIN_JWT_SECRET`    | ✅ secret    | —               | `render.yaml` generates one.                          |
+| `STORAGE_PROVIDER`    | `cloudinary` | —               | Render's disk is wiped on every deploy.               |
+| `CLOUDINARY_URL`      | ✅ secret    | —               | `cloudinary://KEY:SECRET@CLOUD_NAME`.                 |
+| `SMTP_*`              | ✅ secret    | —               | Without these, email is written to disk and lost.     |
+| `MAIL_FROM`           | ✅           | —               | Must match the SMTP account's verified sender.        |
+| `COOKIE_SAMESITE`     | `lax`        | —               | Only change if you drop the rewrites — see below.     |
+| `ALLOW_DEMO_SEED`     | unset        | —               | Set to `true` by hand, once, to seed the demo site.   |
+| `API_ORIGIN`          | —            | ✅              | The Render URL. Used by the rewrites and SSR fetches. |
 
 Nothing in this table is committed. Every value marked secret is typed into the host's dashboard.
 
@@ -208,13 +208,13 @@ Both hosts deploy on a push to `main`. To redeploy without a code change: Render
 
 ### Known limits of the free tier
 
-| Limit                           | What it means in practice                                                           |
-| ------------------------------- | ------------------------------------------------------------------------------------ |
-| Render sleeps after ~15 minutes idle | The first request wakes it and takes **30–50 seconds**. Every request after that is normal. The demo script says to open the site a minute before presenting. |
-| Render's disk is ephemeral      | Anything written to it disappears on the next deploy. This is why `STORAGE_PROVIDER=cloudinary` in production, and why invoice PDFs are re-rendered on demand rather than trusted to survive. |
-| Atlas M0: 512MB, shared CPU     | Far more than this shop needs; queries may be slower under load.                       |
-| Cloudinary free: 25 credits/month | Roughly 25k transformations or 25GB of delivery. The catalogue is a few dozen images.  |
-| Brevo free: 300 emails/day      | An order confirmation plus an invoice is two. Comfortable.                             |
+| Limit                                | What it means in practice                                                                                                                                                                     |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Render sleeps after ~15 minutes idle | The first request wakes it and takes **30–50 seconds**. Every request after that is normal. The demo script says to open the site a minute before presenting.                                 |
+| Render's disk is ephemeral           | Anything written to it disappears on the next deploy. This is why `STORAGE_PROVIDER=cloudinary` in production, and why invoice PDFs are re-rendered on demand rather than trusted to survive. |
+| Atlas M0: 512MB, shared CPU          | Far more than this shop needs; queries may be slower under load.                                                                                                                              |
+| Cloudinary free: 25 credits/month    | Roughly 25k transformations or 25GB of delivery. The catalogue is a few dozen images.                                                                                                         |
+| Brevo free: 300 emails/day           | An order confirmation plus an invoice is two. Comfortable.                                                                                                                                    |
 
 Because Render sleeps, the auto-cancel sweep runs **on boot as well as every fifteen minutes**: a service that
 slept overnight has a night's worth of intervals that never fired, and the first wake is the only chance to
@@ -236,30 +236,30 @@ uploads are no longer same-origin. Use the rewrites.
 Run every row by hand against the live URL and record ✅ / ❌ with a note. A ❌ is fixed, redeployed and
 re-tested, and the row then shows both the failure and the fix.
 
-| # | Check | Result | Notes |
-|---|---|---|---|
-| 1 | `GET /api/health` answers `{"ok":true,"db":"up"}` | | |
-| 2 | Home page loads, hero and featured products render | | |
-| 3 | Shop: filters, sort and pagination all change the results | | |
-| 4 | Product page: variants switch price and stock | | |
-| 5 | Cart survives a reload | | |
-| 6 | All of the above on a phone (Pixel/iPhone, real device) | | |
-| 7 | Register a test customer | | |
-| 8 | Checkout by bank transfer; bank details shown are the owner's | | |
-| 9 | "I've paid" moves the order to Awaiting confirmation | | |
-| 10 | Admin sign-in as the owner | | |
-| 11 | Wrong PIN is refused; correct PIN confirms the payment | | |
-| 12 | Order becomes PAID and an invoice is issued | | |
-| 13 | Invoice PDF downloads and is branded and complete | | |
-| 14 | "Send to customer" arrives in a real inbox with the PDF attached | | |
-| 15 | Create a product with an image; it appears on the storefront | | |
-| 16 | MANAGER cannot open Admin users or Store settings | | |
-| 17 | STAFF sees no revenue figures anywhere | | |
-| 18 | Audit trail shows every action from this run | | |
-| 19 | Playwright suite green against `E2E_BASE_URL` | | |
-| 20 | Lighthouse on home and a product page | | |
-| 21 | Zero console errors on home, shop, product, cart, checkout | | |
-| 22 | `/api/health` p95 noted after warm-up | | |
+| #   | Check                                                            | Result | Notes |
+| --- | ---------------------------------------------------------------- | ------ | ----- |
+| 1   | `GET /api/health` answers `{"ok":true,"db":"up"}`                |        |       |
+| 2   | Home page loads, hero and featured products render               |        |       |
+| 3   | Shop: filters, sort and pagination all change the results        |        |       |
+| 4   | Product page: variants switch price and stock                    |        |       |
+| 5   | Cart survives a reload                                           |        |       |
+| 6   | All of the above on a phone (Pixel/iPhone, real device)          |        |       |
+| 7   | Register a test customer                                         |        |       |
+| 8   | Checkout by bank transfer; bank details shown are the owner's    |        |       |
+| 9   | "I've paid" moves the order to Awaiting confirmation             |        |       |
+| 10  | Admin sign-in as the owner                                       |        |       |
+| 11  | Wrong PIN is refused; correct PIN confirms the payment           |        |       |
+| 12  | Order becomes PAID and an invoice is issued                      |        |       |
+| 13  | Invoice PDF downloads and is branded and complete                |        |       |
+| 14  | "Send to customer" arrives in a real inbox with the PDF attached |        |       |
+| 15  | Create a product with an image; it appears on the storefront     |        |       |
+| 16  | MANAGER cannot open Admin users or Store settings                |        |       |
+| 17  | STAFF sees no revenue figures anywhere                           |        |       |
+| 18  | Audit trail shows every action from this run                     |        |       |
+| 19  | Playwright suite green against `E2E_BASE_URL`                    |        |       |
+| 20  | Lighthouse on home and a product page                            |        |       |
+| 21  | Zero console errors on home, shop, product, cart, checkout       |        |       |
+| 22  | `/api/health` p95 noted after warm-up                            |        |       |
 
 The test customer and test admin used here are dedicated to this checklist, and the Playwright run cancels
 the order it creates so the live data stays clean.

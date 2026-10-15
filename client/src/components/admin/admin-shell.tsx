@@ -72,7 +72,11 @@ export function AdminShell({ session, children }: { session: AdminSession; child
                 <MenuIcon aria-hidden="true" className="size-5" />
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[260px] border-0 bg-brand-navy p-0" showCloseButton={false}>
+            <SheetContent
+              side="left"
+              className="w-[260px] border-0 bg-brand-navy p-0"
+              showCloseButton={false}
+            >
               <AdminSidebar
                 groups={groups}
                 collapsed={false}
@@ -110,6 +114,9 @@ export function AdminShell({ session, children }: { session: AdminSession; child
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
+                // Named explicitly: below `sm` the name block is hidden and the avatar is decorative, which
+                // would leave the button with no accessible name at all on a phone.
+                aria-label={`Account menu for ${admin?.firstName ?? ""} ${admin?.lastName ?? ""}`.trim()}
                 className="flex items-center gap-2 rounded-md py-1.5 pr-2 pl-1.5 text-left hover:bg-grey-100 focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none"
               >
                 <span

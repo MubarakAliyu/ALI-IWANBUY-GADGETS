@@ -86,13 +86,7 @@ export async function requireAdmin(req: Request, res: Response, next: NextFuncti
 export function requirePasswordChosen(req: Request, _res: Response, next: NextFunction): void {
   const admin = currentAdmin(req);
   if (admin.mustChangePassword) {
-    next(
-      new AppError(
-        403,
-        "PASSWORD_CHANGE_REQUIRED",
-        "Choose your own password before you continue.",
-      ),
-    );
+    next(new AppError(403, "PASSWORD_CHANGE_REQUIRED", "Choose your own password before you continue."));
     return;
   }
   next();

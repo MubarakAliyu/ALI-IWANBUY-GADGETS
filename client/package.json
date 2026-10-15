@@ -11,7 +11,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test --project=desktop --project=mobile",
+    "screenshots": "playwright test --project=capture"
   },
   "dependencies": {
     "@aib/shared": "workspace:*",

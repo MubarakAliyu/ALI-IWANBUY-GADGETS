@@ -279,11 +279,7 @@ export async function adminCancelOrder(
 
   if (order.paymentStatus === "PAID") {
     if (!input.pin) {
-      throw new AppError(
-        403,
-        "PIN_REQUIRED",
-        "This order has been paid for. Enter your PIN to cancel it.",
-      );
+      throw new AppError(403, "PIN_REQUIRED", "This order has been paid for. Enter your PIN to cancel it.");
     }
     await verifyPin(admin._id.toString(), input.pin, req);
   }

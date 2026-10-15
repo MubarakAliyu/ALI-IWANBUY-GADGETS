@@ -10,7 +10,15 @@ import { cn } from "@/lib/cn";
  * The period the overview is read over, kept in the URL (A-3) — so a link to "last month" is a link someone
  * can send, and the back button walks back through what was actually looked at.
  */
-export function PeriodSelector({ period, from, to }: { period: DashboardPeriod; from?: string; to?: string }) {
+export function PeriodSelector({
+  period,
+  from,
+  to,
+}: {
+  period: DashboardPeriod;
+  from?: string;
+  to?: string;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();

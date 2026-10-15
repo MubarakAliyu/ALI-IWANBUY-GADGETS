@@ -23,8 +23,23 @@ export default defineConfig({
   },
 
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } } },
-    { name: "mobile", use: { ...devices["Pixel 7"] } },
+    // The two that run as tests. They ignore the capture spec, which is not a test.
+    {
+      name: "desktop",
+      testIgnore: /screenshots\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } },
+    },
+    { name: "mobile", testIgnore: /screenshots\.spec\.ts/, use: { ...devices["Pixel 7"] } },
+
+    /**
+     * `pnpm screenshots` — photographs the running app for the pitch pack. It is a project rather than an
+     * environment variable so the same command works on Windows and POSIX, and it sets its own viewports.
+     */
+    {
+      name: "capture",
+      testMatch: /screenshots\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
   ],
 
   webServer: {

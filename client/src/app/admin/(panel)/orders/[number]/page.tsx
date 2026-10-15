@@ -76,7 +76,7 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ num
             <ul className="divide-y divide-grey-200">
               {order.items.map((item) => (
                 <li key={item.sku} className="flex items-start justify-between gap-4 py-3">
-                  <div className="min-w-0 grid gap-0.5">
+                  <div className="grid min-w-0 gap-0.5">
                     <Link
                       href={`/product/${item.slug}`}
                       className="truncate font-semibold text-brand-navy hover:text-brand-primary"
@@ -212,9 +212,12 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ num
                 <Row
                   label="Status"
                   value={
-                    { UNPAID: "Unpaid", AWAITING_CONFIRMATION: "Awaiting", PAID: "Paid", REFUNDED: "Refunded" }[
-                      order.paymentStatus
-                    ] ?? order.paymentStatus
+                    {
+                      UNPAID: "Unpaid",
+                      AWAITING_CONFIRMATION: "Awaiting",
+                      PAID: "Paid",
+                      REFUNDED: "Refunded",
+                    }[order.paymentStatus] ?? order.paymentStatus
                   }
                 />
                 <Row

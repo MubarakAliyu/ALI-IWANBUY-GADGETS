@@ -37,13 +37,7 @@ export async function customers(req: Request, res: Response): Promise<void> {
 export async function setCustomerStatus(req: Request, res: Response): Promise<void> {
   const input = validated<CustomerStatusInput>(res);
   res.json(
-    await people.setCustomerStatus(
-      String(req.params.id),
-      input.status,
-      input.reason,
-      currentAdmin(req),
-      req,
-    ),
+    await people.setCustomerStatus(String(req.params.id), input.status, input.reason, currentAdmin(req), req),
   );
 }
 

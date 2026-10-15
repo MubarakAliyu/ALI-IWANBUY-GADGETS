@@ -27,6 +27,11 @@ import { BRAND_COLOURS } from "@/styles/tokens";
  * a Tailwind class is not an option here. Every chart has an accessible table-shaped summary behind it,
  * because a chart alone tells a screen-reader user nothing.
  *
+ * Each chart container is `aria-hidden` **and** `inert`: recharts puts a focusable wrapper around its SVG,
+ * and an `aria-hidden` subtree containing something focusable is a WCAG failure — a keyboard lands on an
+ * element a screen reader has been told does not exist. `inert` takes the whole subtree out of the tab order,
+ * which leaves the visually hidden table as the one version that is announced, and the complete one.
+ *
  * Grid lines, legends and 3D are all absent on purpose: the axis labels and the tooltip carry the numbers,
  * and anything else is ink that is not data.
  */
@@ -43,14 +48,18 @@ function TooltipBox({ label, value }: { label: string; value: string }) {
 }
 
 /** Revenue for each day of the window. */
-export function RevenueChart({ data }: { data: Dashboard["financial"] extends null ? never : { day: string; revenueKobo: number }[] }) {
+export function RevenueChart({
+  data,
+}: {
+  data: Dashboard["financial"] extends null ? never : { day: string; revenueKobo: number }[];
+}) {
   const points = data.map((point) => ({ ...point, naira: point.revenueKobo / 100 }));
 
   return (
     <figure className="grid gap-3">
       <figcaption className="text-body-sm font-semibold text-brand-navy">Revenue by day</figcaption>
 
-      <div className="h-56 w-full" aria-hidden="true">
+      <div className="h-56 w-full" aria-hidden="true" inert>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
             <defs>
@@ -68,7 +77,9 @@ export function RevenueChart({ data }: { data: Dashboard["financial"] extends nu
             <YAxis
               {...AXIS}
               width={56}
-              tickFormatter={(naira: number) => (naira >= 1000 ? `${Math.round(naira / 1000)}k` : String(naira))}
+              tickFormatter={(naira: number) =>
+                naira >= 1000 ? `${Math.round(naira / 1000)}k` : String(naira)
+              }
             />
             <Tooltip
               cursor={{ stroke: BRAND_COLOURS["grey-200"] }}
@@ -114,7 +125,12 @@ export function StatusChart({ data }: { data: { status: string; count: number }[
 
       {/* Horizontal, because "Awaiting confirmation" and "Ready for pickup" do not fit under a vertical bar
           without being turned on their side and overlapping each other. */}
-      <div className="w-full" style={{ height: Math.max(160, points.length * 34 + 24) }} aria-hidden="true">
+      <div
+        className="w-full"
+        style={{ height: Math.max(160, points.length * 34 + 24) }}
+        aria-hidden="true"
+        inert
+      >
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={points} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 8 }}>
             <XAxis type="number" {...AXIS} allowDecimals={false} hide />
@@ -176,7 +192,7 @@ export function PaymentMethodChart({
         <p className="py-10 text-center text-body-sm text-text-muted">No orders in this period.</p>
       ) : (
         <>
-          <div className="h-48 w-full" aria-hidden="true">
+          <div className="h-48 w-full" aria-hidden="true" inert>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

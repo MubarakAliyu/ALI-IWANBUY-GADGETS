@@ -26,11 +26,7 @@ export default async function AdminCustomersPage({
         </p>
       </div>
 
-      <CustomersTable
-        result={result}
-        permissions={permissions}
-        exportHref={exportHref("customers", query)}
-      />
+      <CustomersTable result={result} permissions={permissions} exportHref={exportHref("customers", query)} />
     </div>
   );
 }

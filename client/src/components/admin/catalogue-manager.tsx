@@ -118,7 +118,7 @@ function CategoriesPanel({ rows, canManage }: { rows: CategoryRow[]; canManage: 
       <ul className="divide-y divide-grey-200 rounded-lg border border-grey-200 bg-white">
         {rows.map((row, index) => (
           <li key={row.id} className="flex flex-wrap items-center gap-3 p-3">
-            <div className="min-w-0 flex-1 grid gap-0.5">
+            <div className="grid min-w-0 flex-1 gap-0.5">
               <span className="flex items-center gap-2">
                 {row.parentName ? (
                   <span className="text-caption text-text-muted">{row.parentName} ›</span>
@@ -151,7 +151,12 @@ function CategoriesPanel({ rows, canManage }: { rows: CategoryRow[]; canManage: 
                 >
                   <ArrowDownIcon aria-hidden="true" className="size-4" />
                 </Button>
-                <Button variant="ghost" size="icon" aria-label={`Edit ${row.name}`} onClick={() => setEditing(row)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Edit ${row.name}`}
+                  onClick={() => setEditing(row)}
+                >
                   <PencilIcon aria-hidden="true" className="size-4" />
                 </Button>
                 <Button
@@ -339,11 +344,11 @@ function BrandsPanel({ rows, canManage }: { rows: BrandRow[]; canManage: boolean
       <ul className="divide-y divide-grey-200 rounded-lg border border-grey-200 bg-white">
         {rows.map((row) => (
           <li key={row.id} className="flex flex-wrap items-center gap-3 p-3">
-            <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-md bg-grey-100 font-mono text-caption font-semibold text-brand-navy">
+            <span className="font-mono inline-flex size-9 shrink-0 items-center justify-center rounded-md bg-grey-100 text-caption font-semibold text-brand-navy">
               {row.code}
             </span>
 
-            <div className="min-w-0 flex-1 grid gap-0.5">
+            <div className="grid min-w-0 flex-1 gap-0.5">
               <span className="flex items-center gap-2">
                 <span className="font-semibold text-brand-navy">{row.name}</span>
                 {row.isActive ? null : <Badge variant="cancelled">Hidden</Badge>}
@@ -355,7 +360,12 @@ function BrandsPanel({ rows, canManage }: { rows: BrandRow[]; canManage: boolean
 
             {canManage ? (
               <div className="flex gap-1">
-                <Button variant="ghost" size="icon" aria-label={`Edit ${row.name}`} onClick={() => setEditing(row)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Edit ${row.name}`}
+                  onClick={() => setEditing(row)}
+                >
                   <PencilIcon aria-hidden="true" className="size-4" />
                 </Button>
                 <Button
@@ -461,7 +471,7 @@ function BrandDialog({
                 {...control}
                 value={code}
                 maxLength={3}
-                className="w-24 font-mono uppercase"
+                className="font-mono w-24 uppercase"
                 onChange={(event) => setCode(event.target.value.toUpperCase())}
               />
             )}

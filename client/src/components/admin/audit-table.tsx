@@ -85,9 +85,7 @@ function AuditEntry({ row }: { row: AuditRow }) {
   const [open, setOpen] = useState(false);
   const hasDiff = Boolean(row.diff?.before || row.diff?.after);
 
-  const keys = [
-    ...new Set([...Object.keys(row.diff?.before ?? {}), ...Object.keys(row.diff?.after ?? {})]),
-  ];
+  const keys = [...new Set([...Object.keys(row.diff?.before ?? {}), ...Object.keys(row.diff?.after ?? {})])];
 
   return (
     <li className="grid">
@@ -97,7 +95,7 @@ function AuditEntry({ row }: { row: AuditRow }) {
           onClick={() => setOpen((value) => !value)}
           disabled={!hasDiff}
           aria-expanded={hasDiff ? open : undefined}
-          className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-sm text-text-muted hover:bg-grey-100 disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none"
+          className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-sm text-text-muted hover:bg-grey-100 focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none disabled:opacity-30"
         >
           {open ? (
             <ChevronDownIcon aria-hidden="true" className="size-4" />
@@ -107,7 +105,7 @@ function AuditEntry({ row }: { row: AuditRow }) {
           <span className="sr-only">{hasDiff ? "Show what changed" : "Nothing more to show"}</span>
         </button>
 
-        <div className="min-w-0 flex-1 grid gap-1">
+        <div className="grid min-w-0 flex-1 gap-1">
           <p className="text-body-sm text-brand-navy">{row.summary || humanise(row.action)}</p>
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-caption text-text-muted">
             <span>{formatDateTime(row.at)}</span>
@@ -157,13 +155,13 @@ function AuditEntry({ row }: { row: AuditRow }) {
             <tbody className="align-top">
               {keys.map((key) => (
                 <tr key={key} className="border-t border-grey-200">
-                  <th scope="row" className="py-1.5 pr-4 font-mono font-normal text-brand-navy">
+                  <th scope="row" className="font-mono py-1.5 pr-4 font-normal text-brand-navy">
                     {key}
                   </th>
-                  <td className="py-1.5 pr-4 font-mono text-text-muted line-through decoration-grey-300">
+                  <td className="font-mono py-1.5 pr-4 text-text-muted line-through decoration-grey-300">
                     {show((row.diff?.before ?? {})[key])}
                   </td>
-                  <td className="py-1.5 font-mono text-brand-navy">{show((row.diff?.after ?? {})[key])}</td>
+                  <td className="font-mono py-1.5 text-brand-navy">{show((row.diff?.after ?? {})[key])}</td>
                 </tr>
               ))}
             </tbody>

@@ -16,9 +16,7 @@ export default async function AdminAccountPage() {
     <div className="grid max-w-3xl gap-5">
       <div className="grid gap-1">
         <h1 className="text-h1 text-brand-navy">Account settings</h1>
-        <p className="text-body-sm text-text-muted">
-          Your details, your password and your payment PIN.
-        </p>
+        <p className="text-body-sm text-text-muted">Your details, your password and your payment PIN.</p>
       </div>
 
       <AccountSettings admin={session.admin} />

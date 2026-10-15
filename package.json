@@ -15,6 +15,7 @@
     "lint": "eslint . --max-warnings=0",
     "test": "pnpm --filter @aib/shared build && pnpm -r --sequential test",
     "test:e2e": "pnpm --filter @aib/client test:e2e",
+    "screenshots": "pnpm --filter @aib/client screenshots",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "seed": "pnpm --filter @aib/server seed",

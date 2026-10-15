@@ -1,11 +1,11 @@
 # Progress
 
-| Batch                                             | Branch                           | Status         | Commit    | Date       |
-| ------------------------------------------------- | -------------------------------- | -------------- | --------- | ---------- |
-| 0 — Planning (overview, batch prompts, brand kit) | —                                | ✅ Done        | —         | 8 Oct 2026 |
-| 1 — Foundation & Storefront                       | `batch/01-foundation-storefront` | ✅ Done        | `fd71b5e` | 9 Oct 2026 |
-| 2 — Accounts, wishlist & checkout                 | `batch/02-accounts-checkout`     | ✅ Done        | `687e062` | 9 Oct 2026 |
-| 3 — Admin dashboard, deployment & pitch           | `batch/03-admin`                 | 🔨 In progress |           |            |
+| Batch                                             | Branch                           | Status  | Commit    | Date        |
+| ------------------------------------------------- | -------------------------------- | ------- | --------- | ----------- |
+| 0 — Planning (overview, batch prompts, brand kit) | —                                | ✅ Done | —         | 8 Oct 2026  |
+| 1 — Foundation & Storefront                       | `batch/01-foundation-storefront` | ✅ Done | `fd71b5e` | 9 Oct 2026  |
+| 2 — Accounts, wishlist & checkout                 | `batch/02-accounts-checkout`     | ✅ Done | `687e062` | 9 Oct 2026  |
+| 3 — Admin dashboard, deployment & pitch           | `batch/03-admin`                 | ✅ Done | `PENDING` | 10 Oct 2026 |
 
 ## Batch log
 
@@ -107,6 +107,120 @@ photographs.
    registered one; the storefront shows the flyer one in the footer and both on the contact page.
 5. **Opening hours** on the contact page are a reasonable assumption and need confirming.
 
+### Batch 3 — Admin dashboard, deployment & pitch · 10 Oct 2026
+
+The shop gets a back office. A customer can already buy; now the people who run the shop can see what was
+bought, confirm that the money arrived, and change what is for sale — with every one of those actions
+attributable to a named person.
+
+**The owner's details (Part 0).** `server/src/seed/data/store-settings.ts` is the single source: the shop's
+registered address, RC number, TIN, phone, WhatsApp, email, bank account, opening hours and delivery fees.
+The seed reads it, and `pnpm settings:apply-defaults` writes it over an existing database idempotently,
+printing before and after per field and leaving products, customers, orders and owner-tuned fees alone. The
+storefront, the checkout and the invoice PDF all read from the database rather than from a constant, so the
+owner can change any of it from the dashboard without a deploy (ADR-017).
+
+**Admin auth (Part A).** An `Admin` model that shares nothing with `Customer`: its own cookie (`aib_a`, eight
+hours, re-issued on every authenticated request so a working day does not end mid-task), its own signing key,
+its own lockout, and a payment PIN. `requireAdmin` re-reads the account and compares `tokenVersion` on every
+request. `requirePasswordChosen` refuses everything except the two routes that let a new admin finish setting
+themselves up. Eight wrong passwords lock for thirty minutes; five wrong PINs lock for fifteen; every outcome
+is audited.
+
+**One permission matrix (Part A).** `shared/src/admin.ts` holds it, both sides import it, and
+`requirePermission()` is what actually decides. The dashboard hides what a role cannot do, but a refusal comes
+from the server and writes a `PERMISSION_DENIED` row. The distinction is load-bearing: a STAFF member does not
+merely fail to see revenue — `buildDashboard` never computes it, and `financial` is `null` in the response.
+
+**The shell and the tables (Part B).** A 260px navy sidebar collapsing to a 72px rail, remembered per browser
+through `useSyncExternalStore` rather than copied into state in an effect; role-filtered navigation; a drawer
+on a phone; one search box that routes by what was typed; a bell polling the awaiting-confirmation queue every
+sixty seconds. A reusable `DataTable` whose state is the URL, so a filtered table is a link and the CSV export
+downloads exactly what is on screen.
+
+**The overview (Part C).** `GET /admin/dashboard` aggregates over **Lagos** day boundaries — an order placed
+at 00:30 in Lagos belongs to that day, not to the one UTC still thinks it is. The period and the one before it
+are resolved server-side, so "up 12%" has one definition. Revenue is a plain sum of payment rows, which nets
+off refunds by construction. Eight tiles, an area chart, a donut and a horizontal status bar, in brand colours
+only, each chart with the same figures in a visually hidden table beside it.
+
+**Money (Part D).** Confirming a payment is one transaction in a deliberate order: verify the PIN _outside_
+the transaction, because a wrong PIN should cost nothing; assert the order is payable; require the amount to
+equal the total exactly; then write the `Payment`, the `Invoice`, the order's new state and the audit row
+together. A second click answers `409 ALREADY_PAID` and writes nothing. The email is sent after the commit.
+A refund is its own negative `Payment` pointing at the one it reverses (ADR-018) and restocks every item.
+
+**Invoices (Part D).** Branded A4 drawn with pdfkit: the white horizontal lockup on the navy band, Montserrat
+embedded from `brand/fonts/ttf/`, the company block, the items, the totals, the payment status and the bank
+details. Rendered on first download and kept (ADR-021), with a page break when an order is long. Send, resend
+and void (owner only) are all audited, and `GET /orders/:number/invoice.pdf` finally works for the customer.
+
+**The catalogue (Part E).** A variant is never replaced, only edited — order lines snapshot a variant's id and
+stock is decremented against it, so an edit that dropped and re-created them would orphan every order that
+referenced one. A variant that appears on an order cannot be deleted, only made unavailable. Stock moves by a
+delta inside a transaction and can never go below zero. Uploads are re-encoded by sharp to WebP at 400, 800
+and 1400 behind a storage interface; the original is not kept. A brand rename rewrites the denormalised
+`brandName` on every product (ADR-009) and says how many it touched.
+
+**People, settings and the trail (Part F).** Customers with search, suspend and reactivate; admin users with a
+temporary password shown once on screen and deliberately absent from the invite email; store settings as one
+audited form. The last-owner guard counts the active owners _other than_ the one being changed — the number
+who would still be owners afterwards. The audit trail has no write path at all: no route, no service function,
+and the model throws on every update and delete hook.
+
+**Production readiness (Part H.1).** A Cloudinary provider behind the same storage interface, because Render's
+disk is wiped on every deploy. Cookies stay `sameSite=lax` because the browser only ever talks to the Vercel
+domain, which rewrites `/api/*` through — first-party cookies, no CORS preflight; `COOKIE_SAMESITE=none` is
+the documented fallback. The auto-cancel sweep runs on boot as well as on its timer, because a free service
+that slept overnight has a night of intervals that never fired. `pnpm seed` against production needs
+`ALLOW_DEMO_SEED=true`, set by hand and never by a deploy.
+
+#### Gates
+
+| Gate             | Result                                                                         |
+| ---------------- | ------------------------------------------------------------------------------ |
+| `pnpm typecheck` | clean                                                                          |
+| `pnpm lint`      | clean, `--max-warnings=0`                                                      |
+| `pnpm test`      | **245 passed** — 193 server, 34 client, 18 shared                              |
+| `pnpm build`     | clean                                                                          |
+| `pnpm test:e2e`  | **66 passed** — desktop + Pixel 7, axe on twelve pages including the dashboard |
+
+311 automated tests in all. Three defects were found by the tests themselves and fixed: the chart containers
+were `aria-hidden` while still focusable (ADR-022), the admin menu button lost its accessible name below `sm`
+(ADR-023), and the trivial-PIN rule was wrongly applied when _entering_ a PIN as well as when choosing one
+(ADR-020) — that last one found by actually using the dialog rather than by reading the code.
+
+#### Decisions taken
+
+ADR-018 (a refund is a negative payment), ADR-019 (internal order notes, from overview A-4), ADR-020 (a wrong
+PIN answers 401), ADR-021 (invoice PDFs rendered on first download), ADR-022 (`inert` chart containers),
+ADR-023 (the admin menu button's own label), ADR-024 ("visible on the storefront" proven on the product's own
+page).
+
+#### Deferred, with reasons
+
+- **Deployment is ready but not done (P3.1, P3.3, P3.4).** Every line of code the live site needs is written
+  and committed — the Cloudinary provider, the cookie strategy, `trust proxy`, the health check, the seed
+  guard, `render.yaml` — and `docs/DEPLOYMENT.md` has the exact clicks for Atlas, Cloudinary, SMTP, Render and
+  Vercel. What is left needs accounts only the student can create. The production test report is laid out with
+  its 22 rows waiting; they stay unticked because ticking them now would claim something untrue.
+- **The `dataviz` guidance the brief names was not available in this session.** The charts were built to the
+  brand constraints instead — tokens only, `#156FBF` for the area chart, no gridlines or legends where the
+  axis and tooltip already carry the numbers — and every chart has an accessible table behind it. Worth a pass
+  if that guidance turns up.
+- **Performance is unchanged** at 85 (home) / 81 (product). The dashboard is behind a login and not measured
+  by Lighthouse; the storefront's remaining cost is still shared JavaScript, as recorded in Batch 1.
+- **Product photographs are still generated placeholders** (ADR-006). Obviously placeholders on purpose.
+
+#### Needs the client
+
+1. **Accounts for the hosting**: MongoDB Atlas, Render, Vercel, Cloudinary and an SMTP sender. Everything else
+   is ready; `docs/DEPLOYMENT.md` is the runbook. Nothing secret is ever committed or pasted into chat.
+2. **Real product photographs** and category images (ADR-006, OPEN-004).
+3. **The owner's own admin password and PIN.** The seeded ones are for the lab demo only, and
+   `docs/DEMO-ACCOUNTS.md` is not committed.
+4. **A final logo export.** The current lockups are the interim ones (ADR-003).
+
 ### Batch 2 — Customer accounts, wishlist & checkout · 9 Oct 2026
 
 A browser becomes a buyer: register in one screen, keep the cart you built as a guest, check out, and watch
@@ -180,18 +294,19 @@ layout).
 
 - **Performance.** Home first-load JavaScript is now 263 kB (was 243 kB) because of ADR-013. The Batch 1
   follow-up — loading the header's menus on interaction — is still the lever, and now has more to gain.
-- **`GET /orders/:number/invoice.pdf` answers 404** until Batch 3 issues invoices; the order page only shows the
-  download when `order.invoice` exists.
-- **Customer and order seed data.** `pnpm seed` still seeds the catalogue only. Batch 3 adds admins, customers
-  and ~60 orders of history so the dashboard has something to show.
-- **Payment documents** are not written yet: the model exists, and Batch 3's PIN-protected confirmation creates
-  them.
+- ~~**`GET /orders/:number/invoice.pdf` answers 404**~~ — closed in Batch 3: an invoice is issued with every
+  confirmed payment and the PDF is rendered on first download.
+- ~~**Customer and order seed data.**~~ — closed in Batch 3: `pnpm seed` now writes three admins, six customers
+  and sixty days of order history with matching payments, invoices and audit rows.
+- ~~**Payment documents**~~ — closed in Batch 3: PIN-protected confirmation writes the `Payment` and the
+  `Invoice` in one transaction.
 
 #### Needs the client
 
-1. **Real bank details** — still `UPDATE IN SETTINGS`. Until the owner enters them, the success page tells the
-   customer to call the shop rather than showing an account number. This now blocks the main payment path.
+1. ~~**Real bank details**~~ — supplied and seeded (ADR-017): Moniepoint · ALI ABDULLAHI · 5737727740, editable
+   from Store Settings.
 2. **Real product photographs** and **category photographs** (ADR-006, OPEN-004).
-3. **Which shop address is correct** (OPEN-001), and the opening hours used on the contact and pickup copy.
+3. ~~**Which shop address is correct**~~ — confirmed (ADR-017): Shop No. 26, Bindawa Plaza, Ahmadu Bello Way,
+   Birnin Kebbi. Opening hours confirmed too.
 4. **An SMTP account** for production email. Development writes to `server/.local/outbox/`; nothing reaches a
    customer until `SMTP_HOST` is set (ADR-008).

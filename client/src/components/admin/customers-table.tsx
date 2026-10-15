@@ -222,11 +222,7 @@ function StatusDialog({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            variant={suspending ? "danger" : "primary"}
-            loading={busy}
-            onClick={() => void submit()}
-          >
+          <Button variant={suspending ? "danger" : "primary"} loading={busy} onClick={() => void submit()}>
             {suspending ? (
               <>
                 <UserRoundXIcon aria-hidden="true" className="size-4" />

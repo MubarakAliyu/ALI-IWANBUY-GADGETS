@@ -72,8 +72,7 @@ export function ConfirmPaymentDialog({
       });
       router.refresh();
     } catch (error) {
-      const message =
-        error instanceof ApiRequestError ? error.message : "We could not confirm that payment.";
+      const message = error instanceof ApiRequestError ? error.message : "We could not confirm that payment.";
       setFormError(message);
       form.setValue("pin", "");
 
@@ -130,9 +129,7 @@ export function ConfirmPaymentDialog({
           </Field>
 
           <Field label="Note (optional)" error={form.formState.errors.note?.message}>
-            {(control) => (
-              <Input {...control} {...form.register("note")} placeholder="Paid at the counter" />
-            )}
+            {(control) => <Input {...control} {...form.register("note")} placeholder="Paid at the counter" />}
           </Field>
 
           <Field label="Your payment PIN" error={form.formState.errors.pin?.message}>

@@ -251,11 +251,7 @@ export async function reorderCategories(
   return listCategories();
 }
 
-export async function createBrand(
-  input: BrandInput,
-  admin: SignedInAdmin,
-  req?: Request,
-): Promise<BrandDoc> {
+export async function createBrand(input: BrandInput, admin: SignedInAdmin, req?: Request): Promise<BrandDoc> {
   const clash = await Brand.findOne({ code: input.code }).select("name").lean().exec();
   if (clash) {
     throw AppError.badRequest(`${input.code} is already used by ${clash.name}.`, [
@@ -319,10 +315,7 @@ export async function updateBrand(
   // `brandName` is denormalised onto every product for search (ADR-009), so a rename has to reach them.
   let rewritten = 0;
   if (renamed) {
-    const result = await Product.updateMany(
-      { brand: brand._id },
-      { $set: { brandName: brand.name } },
-    ).exec();
+    const result = await Product.updateMany({ brand: brand._id }, { $set: { brandName: brand.name } }).exec();
     rewritten = result.modifiedCount;
   }
 
