@@ -23,34 +23,39 @@ import {
   type ProductDoc,
 } from "../models/index.js";
 import { recordAudit } from "../services/audit.service.js";
+import type { DemoCredentials } from "./demo-credentials.js";
 
 /**
- * Demo passwords. They are printed to the console and written to `docs/DEMO-ACCOUNTS.md`, which is why they
- * are deliberately obvious: these accounts exist to be handed round a classroom. The seed refuses to run in
- * production without an explicit opt-in, and the owner changes them before the shop is real.
+ * Who the demo admins are. Their passwords and PINs are **not** here: in development they come from the
+ * defaults in `demo-credentials.ts`, and in production from the environment, so nothing a public repository
+ * contains can sign in to a live dashboard.
  */
-export const DEMO_ADMIN_PASSWORD = "Owner12345";
-export const DEMO_CUSTOMER_PASSWORD = "Customer123";
-const DEMO_OWNER_PIN = "8426";
-const DEMO_MANAGER_PIN = "5193";
-
-export const DEMO_ADMINS = [
-  {
-    firstName: "Ali",
-    lastName: "Abdullahi",
-    email: "owner@aliiwanbuy.com",
-    role: "OWNER",
-    pin: DEMO_OWNER_PIN,
-  },
-  {
-    firstName: "Hauwa",
-    lastName: "Sani",
-    email: "manager@aliiwanbuy.com",
-    role: "MANAGER",
-    pin: DEMO_MANAGER_PIN,
-  },
-  { firstName: "Yusuf", lastName: "Garba", email: "staff@aliiwanbuy.com", role: "STAFF", pin: null },
-] as const;
+export function demoAdmins(credentials: DemoCredentials) {
+  return [
+    {
+      firstName: "Ali",
+      lastName: "Abdullahi",
+      email: "owner@aliiwanbuy.com",
+      role: "OWNER" as const,
+      pin: credentials.ownerPin,
+    },
+    {
+      firstName: "Hauwa",
+      lastName: "Sani",
+      email: "manager@aliiwanbuy.com",
+      role: "MANAGER" as const,
+      pin: credentials.managerPin,
+    },
+    {
+      firstName: "Yusuf",
+      lastName: "Garba",
+      email: "staff@aliiwanbuy.com",
+      role: "STAFF" as const,
+      // Staff cannot confirm payments, so there is nothing for a PIN to protect.
+      pin: null,
+    },
+  ];
+}
 
 const DEMO_CUSTOMERS = [
   { firstName: "Amina", lastName: "Bello", city: "Birnin Kebbi", state: "Kebbi" },
@@ -78,11 +83,11 @@ function pick<T>(next: () => number, items: readonly T[]): T {
   return items[Math.floor(next() * items.length)] as T;
 }
 
-export async function seedAdmins(): Promise<AdminDoc[]> {
+export async function seedAdmins(credentials: DemoCredentials): Promise<AdminDoc[]> {
   await Admin.deleteMany({});
   const created: AdminDoc[] = [];
 
-  for (const demo of DEMO_ADMINS) {
+  for (const demo of demoAdmins(credentials)) {
     created.push(
       await Admin.create({
         firstName: demo.firstName,
@@ -90,7 +95,7 @@ export async function seedAdmins(): Promise<AdminDoc[]> {
         email: demo.email,
         phone: "+2347039254143",
         role: demo.role,
-        passwordHash: await hashPassword(DEMO_ADMIN_PASSWORD),
+        passwordHash: await hashPassword(credentials.adminPassword),
         // Demo accounts are handed out ready to use; an admin the owner creates in the dashboard is not.
         mustChangePassword: false,
         pinHash: demo.pin ? await hashPassword(demo.pin) : null,
@@ -102,9 +107,9 @@ export async function seedAdmins(): Promise<AdminDoc[]> {
   return created;
 }
 
-export async function seedCustomers(): Promise<Types.ObjectId[]> {
+export async function seedCustomers(credentials: DemoCredentials): Promise<Types.ObjectId[]> {
   await Customer.deleteMany({});
-  const passwordHash = await hashPassword(DEMO_CUSTOMER_PASSWORD);
+  const passwordHash = await hashPassword(credentials.customerPassword);
   const ids: Types.ObjectId[] = [];
 
   for (const [index, demo] of DEMO_CUSTOMERS.entries()) {

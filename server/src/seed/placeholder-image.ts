@@ -4,13 +4,12 @@
  * greys on `grey-50`, with the brand and model under it. They are obviously placeholders, so the owner can see
  * at a glance which products still need a real photo.
  *
- * Each product gets both the `.svg` that was drawn and a `.webp` rasterised from it — the webp is what the
- * catalogue points at, so `next/image` can size and optimise it like any other photo.
+ * The SVG is drawn and immediately rasterised to WebP; only the WebP is stored, because that is what the
+ * catalogue points at and what `next/image` can size and optimise.
  */
 
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import sharp from "sharp";
+import { storage } from "../lib/storage.js";
 
 export const SILHOUETTES = [
   "phone",
@@ -142,20 +141,21 @@ export function placeholderSvg(options: { brand: string; name: string; silhouett
 }
 
 /**
- * Write `<slug>.svg` and `<slug>.webp` into the seed image folder and return the public URL of the webp.
+ * Draw the placeholder and store it, returning the URL the catalogue should point at.
+ *
+ * It goes through the storage interface rather than writing to disk directly, so a production seed puts the
+ * images wherever that deployment keeps uploads — a folder today, a CDN the day Cloudinary is switched on —
+ * without this file knowing which (Batch 3 Part H.1).
  */
 export async function writePlaceholderImage(options: {
-  directory: string;
   slug: string;
   brand: string;
   name: string;
   silhouette: Silhouette;
 }): Promise<string> {
-  await mkdir(options.directory, { recursive: true });
   const svg = placeholderSvg(options);
-  await writeFile(path.join(options.directory, `${options.slug}.svg`), svg, "utf8");
-  await sharp(Buffer.from(svg))
-    .webp({ quality: 88 })
-    .toFile(path.join(options.directory, `${options.slug}.webp`));
-  return `/uploads/seed/${options.slug}.webp`;
+  const webp = await sharp(Buffer.from(svg)).webp({ quality: 88 }).toBuffer();
+
+  const stored = await storage.put("seed", `${options.slug}.webp`, webp, "image/webp");
+  return stored.url;
 }

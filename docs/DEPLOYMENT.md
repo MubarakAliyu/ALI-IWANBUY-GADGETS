@@ -103,24 +103,62 @@ Render URL is never typed into a browser except to check `/api/health`.
 
 ### What goes where
 
-| Variable              | Render (API) | Vercel (client) | Notes                                                 |
-| --------------------- | ------------ | --------------- | ----------------------------------------------------- |
-| `NODE_ENV`            | `production` | set by Vercel   |                                                       |
-| `PORT`                | `10000`      | —               | Render's own port.                                    |
-| `MONGODB_URI`         | ✅ secret    | —               | Atlas connection string, with the user's password.    |
-| `MONGODB_DB_NAME`     | `aib_store`  | —               |                                                       |
-| `CLIENT_ORIGIN`       | ✅           | —               | The Vercel production URL. Cookies are issued for it. |
-| `CUSTOMER_JWT_SECRET` | ✅ secret    | —               | `render.yaml` generates one.                          |
-| `ADMIN_JWT_SECRET`    | ✅ secret    | —               | `render.yaml` generates one.                          |
-| `STORAGE_PROVIDER`    | `cloudinary` | —               | Render's disk is wiped on every deploy.               |
-| `CLOUDINARY_URL`      | ✅ secret    | —               | `cloudinary://KEY:SECRET@CLOUD_NAME`.                 |
-| `SMTP_*`              | ✅ secret    | —               | Without these, email is written to disk and lost.     |
-| `MAIL_FROM`           | ✅           | —               | Must match the SMTP account's verified sender.        |
-| `COOKIE_SAMESITE`     | `lax`        | —               | Only change if you drop the rewrites — see below.     |
-| `ALLOW_DEMO_SEED`     | unset        | —               | Set to `true` by hand, once, to seed the demo site.   |
-| `API_ORIGIN`          | —            | ✅              | The Render URL. Used by the rewrites and SSR fetches. |
+| Variable                 | Render (API) | Vercel (client) | Notes                                                         |
+| ------------------------ | ------------ | --------------- | ------------------------------------------------------------- |
+| `NODE_ENV`               | `production` | set by Vercel   |                                                               |
+| `PORT`                   | `10000`      | —               | Render's own port.                                            |
+| `MONGODB_URI`            | ✅ secret    | —               | Atlas connection string, with the user's password.            |
+| `MONGODB_DB_NAME`        | `aib_store`  | —               |                                                               |
+| `CLIENT_ORIGIN`          | ✅           | —               | The Vercel production URL. Cookies are issued for it.         |
+| `CUSTOMER_JWT_SECRET`    | ✅ secret    | —               | `render.yaml` generates one.                                  |
+| `ADMIN_JWT_SECRET`       | ✅ secret    | —               | `render.yaml` generates one.                                  |
+| `STORAGE_PROVIDER`       | `local` ⚠️   | —               | `local` works now; `cloudinary` keeps uploads. See below.     |
+| `CLOUDINARY_URL`         | — for now    | —               | `cloudinary://KEY:SECRET@CLOUD_NAME`. Only with `cloudinary`. |
+| `SMTP_*`                 | ✅ secret    | —               | Without these, email is written to disk and lost.             |
+| `MAIL_FROM`              | ✅           | —               | Must match the SMTP account's verified sender.                |
+| `COOKIE_SAMESITE`        | `lax`        | —               | Only change if you drop the rewrites — see below.             |
+| `ALLOW_DEMO_SEED`        | unset        | —               | Set to `true` by hand, once, to seed the demo site.           |
+| `API_ORIGIN`             | —            | ✅              | The Render URL. Used by the rewrites and SSR fetches.         |
+| `DEMO_ADMIN_PASSWORD`    | command line | —               | Seeding only. Not a deploy setting — see step 7.              |
+| `DEMO_CUSTOMER_PASSWORD` | command line | —               | Seeding only.                                                 |
+| `DEMO_OWNER_PIN`         | command line | —               | Seeding only. 4–6 digits, not a run or a repeat.              |
+| `DEMO_MANAGER_PIN`       | command line | —               | Seeding only.                                                 |
 
 Nothing in this table is committed. Every value marked secret is typed into the host's dashboard.
+
+The four `DEMO_*` values are different again: they belong on the command line of the one seeding run and
+**nowhere else** — not in the repository, not in Render's dashboard. The demo accounts can confirm payments,
+so a password anyone can read is a dashboard anyone can use. Outside production the seed uses built-in
+defaults and needs none of them.
+
+### ⚠️ Storage: `local` for now
+
+This deployment starts on `STORAGE_PROVIDER=local` because the Cloudinary sign-up was not available. It
+works — the shop runs, the seeded catalogue has its images, invoices download — with one real limitation:
+
+**Render's disk is wiped on every deploy and every restart.** So:
+
+|                                       |                                                                                                                                                                           |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seeded product images                 | Lost on redeploy. Re-run the seed (step 7) to put them back.                                                                                                              |
+| Images uploaded through the dashboard | **Lost on redeploy, permanently.** Nothing re-creates them.                                                                                                               |
+| Invoice PDFs                          | Safe. They are re-rendered from the order and Store Settings whenever the stored file is missing (ADR-021), so a customer downloading last month's invoice still gets it. |
+| Everything else                       | Safe — it is all in Atlas.                                                                                                                                                |
+
+The API logs one warning at boot saying exactly this. It does not refuse to start: this is a supported
+setup, just a lossy one.
+
+**When Cloudinary is available, two settings change and nothing else:**
+
+1. Render → **Environment** → set `STORAGE_PROVIDER` to `cloudinary`.
+2. Add `CLOUDINARY_URL` = `cloudinary://API_KEY:API_SECRET@CLOUD_NAME` from the Cloudinary dashboard.
+
+Save, let it redeploy, then re-run the seed from step 7 so the catalogue's images are on the CDN too. Any
+product photograph uploaded before the switch is already gone and has to be uploaded again. The code needs no
+change — the storage provider is chosen at boot, and the seed writes through the same interface either way.
+
+If the URL is missing while `STORAGE_PROVIDER=cloudinary`, the API refuses to start and names
+`CLOUDINARY_URL`, rather than failing on the first upload.
 
 ### Step by step
 
@@ -163,9 +201,13 @@ The sender address must be verified in Brevo first, or everything is silently dr
 1. Push the repository to GitHub.
 2. <https://dashboard.render.com> → **New** → **Blueprint** → pick the repository. Render reads
    `render.yaml` at the root and creates the `aib-api` web service with the right build and start commands.
-3. It will stop and ask for every variable marked `sync: false`. Fill in `MONGODB_URI`, `CLIENT_ORIGIN`
-   (you do not have the Vercel URL yet — put `https://localhost` and come back in step 6),
-   `CLOUDINARY_URL` and the `SMTP_*` values.
+3. It will stop and ask for every variable marked `sync: false`. Fill in:
+   - `MONGODB_URI` — from step 1.
+   - `CLIENT_ORIGIN` — you do not have the Vercel URL yet, so put `https://localhost` and come back in step 6.
+   - `STORAGE_PROVIDER` — **`local`** for this first deployment (see ⚠️ above). `cloudinary` once you have an
+     account.
+   - `CLOUDINARY_URL` — leave empty while `STORAGE_PROVIDER` is `local`.
+   - the `SMTP_*` values — from step 3.
 4. **Create** and wait for the first deploy. Then open `https://<service>.onrender.com/api/health` — it must
    answer `{"ok":true,"db":"up"}`. If `db` says `down`, the Atlas user, password or network access is wrong.
 
@@ -183,11 +225,81 @@ cookies will be accepted.
 
 **7 · Seed the demo data**
 
-The lab's site needs something to show. From a machine with the Atlas URI:
+The lab's site needs something to show. This runs on **your machine**, against the Atlas database — not on
+Render — so every variable the server reads at boot has to be on the command line, including the ones Render
+normally supplies. Get one wrong and it either refuses with the variable's name or writes the images to the
+wrong place.
+
+Pick the four demo credentials first. They are not deploy settings and nothing should store them:
+
+- **Passwords** — 10 characters or more. Two of them, one for the admins and one for the customers.
+- **PINs** — 4 to 6 digits, and not a run, a repeat or a date. `1234`, `0000` and `1111` are all refused.
+
+Write them down for the demo; `docs/DEMO-ACCOUNTS.md` is rewritten with them and is not committed.
+
+**Windows PowerShell**
+
+```powershell
+$env:NODE_ENV = "production"
+$env:MONGODB_URI = "<the atlas uri>"
+$env:MONGODB_DB_NAME = "aib_store"
+$env:CUSTOMER_JWT_SECRET = "<the value Render generated>"
+$env:ADMIN_JWT_SECRET = "<the value Render generated>"
+$env:STORAGE_PROVIDER = "local"
+$env:ALLOW_DEMO_SEED = "true"
+$env:DEMO_ADMIN_PASSWORD = "<10+ characters>"
+$env:DEMO_CUSTOMER_PASSWORD = "<10+ characters>"
+$env:DEMO_OWNER_PIN = "<4-6 digits>"
+$env:DEMO_MANAGER_PIN = "<4-6 digits>"
+
+pnpm seed
+```
+
+Those variables last until you close the window. To be sure nothing lingers in a terminal you keep open:
+
+```powershell
+"NODE_ENV","MONGODB_URI","MONGODB_DB_NAME","CUSTOMER_JWT_SECRET","ADMIN_JWT_SECRET",
+"STORAGE_PROVIDER","CLOUDINARY_URL","ALLOW_DEMO_SEED","DEMO_ADMIN_PASSWORD",
+"DEMO_CUSTOMER_PASSWORD","DEMO_OWNER_PIN","DEMO_MANAGER_PIN" |
+  ForEach-Object { Remove-Item "env:$_" -ErrorAction SilentlyContinue }
+```
+
+**bash / zsh**
 
 ```bash
-NODE_ENV=production ALLOW_DEMO_SEED=true MONGODB_URI='<the atlas uri>' pnpm seed
+NODE_ENV=production \
+MONGODB_URI='<the atlas uri>' \
+MONGODB_DB_NAME=aib_store \
+CUSTOMER_JWT_SECRET='<the value Render generated>' \
+ADMIN_JWT_SECRET='<the value Render generated>' \
+STORAGE_PROVIDER=local \
+ALLOW_DEMO_SEED=true \
+DEMO_ADMIN_PASSWORD='<10+ characters>' \
+DEMO_CUSTOMER_PASSWORD='<10+ characters>' \
+DEMO_OWNER_PIN='<4-6 digits>' \
+DEMO_MANAGER_PIN='<4-6 digits>' \
+pnpm seed
 ```
+
+A leading space before `NODE_ENV` keeps the whole line out of your shell history in bash and zsh, if
+`HISTCONTROL=ignorespace` is set.
+
+**Why each one is there**
+
+| Variable                                  | Why the seed needs it                                                                                                                                                                                                              |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV=production`                     | Tells the seed this is the live database, which is what turns on all the guards below.                                                                                                                                             |
+| `MONGODB_URI`, `MONGODB_DB_NAME`          | Where to write. Without them it would seed whatever is in `server/.env` — probably your laptop.                                                                                                                                    |
+| `CUSTOMER_JWT_SECRET`, `ADMIN_JWT_SECRET` | Not used by the seed, but the environment is parsed before anything runs and both are required in production. Any 24-character value works for this run; using Render's keeps it simple.                                           |
+| `STORAGE_PROVIDER`                        | Where the seeded product images go. **Must match what Render is set to** — otherwise the catalogue points at images the API cannot serve. `local` for now; `cloudinary` once that is switched on, with `CLOUDINARY_URL` beside it. |
+| `ALLOW_DEMO_SEED=true`                    | The explicit opt-in. Without it the seed refuses, because it replaces the catalogue, the customers and the whole order history.                                                                                                    |
+| The four `DEMO_*`                         | The accounts it creates. Without all four it refuses and names the ones that are missing.                                                                                                                                          |
+
+> **`STORAGE_PROVIDER=local` writes the images to the machine you run this on, not to Render.** On the live
+> site the catalogue will show broken images until Render's own disk has them. The simplest fix on the free
+> tier is to run the seed, then **Manual Deploy → Clear build cache & deploy** so Render rebuilds and runs its
+> own seed — or to move to `cloudinary`, where the images are on the CDN and this problem disappears. With
+> Cloudinary set, the command above run from anywhere puts the images where both can see them.
 
 It refuses without `ALLOW_DEMO_SEED=true`, and it replaces the catalogue, the customers and the order
 history — never run it against a shop that is actually trading. The demo sign-ins it prints are also written
@@ -208,13 +320,13 @@ Both hosts deploy on a push to `main`. To redeploy without a code change: Render
 
 ### Known limits of the free tier
 
-| Limit                                | What it means in practice                                                                                                                                                                     |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Render sleeps after ~15 minutes idle | The first request wakes it and takes **30–50 seconds**. Every request after that is normal. The demo script says to open the site a minute before presenting.                                 |
-| Render's disk is ephemeral           | Anything written to it disappears on the next deploy. This is why `STORAGE_PROVIDER=cloudinary` in production, and why invoice PDFs are re-rendered on demand rather than trusted to survive. |
-| Atlas M0: 512MB, shared CPU          | Far more than this shop needs; queries may be slower under load.                                                                                                                              |
-| Cloudinary free: 25 credits/month    | Roughly 25k transformations or 25GB of delivery. The catalogue is a few dozen images.                                                                                                         |
-| Brevo free: 300 emails/day           | An order confirmation plus an invoice is two. Comfortable.                                                                                                                                    |
+| Limit                                | What it means in practice                                                                                                                                                                                                                                                               |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Render sleeps after ~15 minutes idle | The first request wakes it and takes **30–50 seconds**. Every request after that is normal. The demo script says to open the site a minute before presenting.                                                                                                                           |
+| Render's disk is ephemeral           | Anything written to it disappears on the next deploy. Invoice PDFs are re-rendered on demand rather than trusted to survive, so they are safe. Uploaded product images are not — which is what `STORAGE_PROVIDER=cloudinary` fixes, and what the ⚠️ above is about while it is `local`. |
+| Atlas M0: 512MB, shared CPU          | Far more than this shop needs; queries may be slower under load.                                                                                                                                                                                                                        |
+| Cloudinary free: 25 credits/month    | Roughly 25k transformations or 25GB of delivery. The catalogue is a few dozen images.                                                                                                                                                                                                   |
+| Brevo free: 300 emails/day           | An order confirmation plus an invoice is two. Comfortable.                                                                                                                                                                                                                              |
 
 Because Render sleeps, the auto-cancel sweep runs **on boot as well as every fifteen minutes**: a service that
 slept overnight has a night's worth of intervals that never fired, and the first wake is the only chance to

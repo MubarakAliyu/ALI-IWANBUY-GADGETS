@@ -119,5 +119,29 @@ function createCloudinaryProvider(): StorageProvider {
   };
 }
 
-export const storage: StorageProvider =
-  env.STORAGE_PROVIDER === "cloudinary" ? createCloudinaryProvider() : localProvider;
+function chooseProvider(): StorageProvider {
+  if (env.STORAGE_PROVIDER === "cloudinary") {
+    return createCloudinaryProvider();
+  }
+
+  /**
+   * Local storage in production is a supported setup, not a misconfiguration — the shop can go live before a
+   * CDN account exists, and everything works. But the host's disk does not survive a deploy, so it says so
+   * once, at boot, rather than leaving someone to discover it when the product photos vanish.
+   *
+   * Invoice PDFs are unaffected: they are re-rendered from the order and Store Settings whenever the stored
+   * file is missing (ADR-021). Product images are not — those are uploads, and once gone they are gone.
+   */
+  if (env.NODE_ENV === "production") {
+    logger.warn(
+      { uploadDir: env.UPLOAD_DIR },
+      "STORAGE_PROVIDER=local in production: uploaded product images are written to this machine's disk and " +
+        "will be lost on the next deploy or restart. Invoice PDFs re-render on demand and are safe. Set " +
+        "STORAGE_PROVIDER=cloudinary and CLOUDINARY_URL to keep uploads.",
+    );
+  }
+
+  return localProvider;
+}
+
+export const storage: StorageProvider = chooseProvider();

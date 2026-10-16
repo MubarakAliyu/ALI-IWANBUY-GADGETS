@@ -7,19 +7,22 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { formatLagosDate } from "../lib/dates.js";
-import { DEMO_ADMIN_PASSWORD, DEMO_ADMINS, DEMO_CUSTOMER_PASSWORD } from "./demo.js";
+import { demoAdmins } from "./demo.js";
+import type { DemoCredentials } from "./demo-credentials.js";
 
-export async function writeDemoAccounts(): Promise<string> {
+export async function writeDemoAccounts(credentials: DemoCredentials): Promise<string> {
   const docsDir = path.resolve(process.cwd(), "..", "docs");
   await mkdir(docsDir, { recursive: true });
   const file = path.join(docsDir, "DEMO-ACCOUNTS.md");
 
-  const adminRows = DEMO_ADMINS.map(
-    (admin) =>
-      `| ${admin.role} | ${admin.firstName} ${admin.lastName} | \`${admin.email}\` | \`${DEMO_ADMIN_PASSWORD}\` | ${
-        admin.pin ? `\`${admin.pin}\`` : "— (staff cannot confirm payments)"
-      } |`,
-  ).join("\n");
+  const adminRows = demoAdmins(credentials)
+    .map(
+      (admin) =>
+        `| ${admin.role} | ${admin.firstName} ${admin.lastName} | \`${admin.email}\` | \`${credentials.adminPassword}\` | ${
+          admin.pin ? `\`${admin.pin}\`` : "— (staff cannot confirm payments)"
+        } |`,
+    )
+    .join("\n");
 
   const content = `# Demo accounts
 
@@ -40,12 +43,12 @@ for, or issuing a refund. Staff have no PIN because their role cannot do any of 
 
 | Name | Email | Password |
 |---|---|---|
-| Amina Bello | \`amina@example.com\` | \`${DEMO_CUSTOMER_PASSWORD}\` |
-| Ibrahim Musa | \`ibrahim@example.com\` | \`${DEMO_CUSTOMER_PASSWORD}\` |
-| Fatima Lawal | \`fatima@example.com\` | \`${DEMO_CUSTOMER_PASSWORD}\` |
-| Chidi Okeke | \`chidi@example.com\` | \`${DEMO_CUSTOMER_PASSWORD}\` |
-| Zainab Yusuf | \`zainab@example.com\` | \`${DEMO_CUSTOMER_PASSWORD}\` |
-| Emeka Nwosu | \`emeka@example.com\` | \`${DEMO_CUSTOMER_PASSWORD}\` |
+| Amina Bello | \`amina@example.com\` | \`${credentials.customerPassword}\` |
+| Ibrahim Musa | \`ibrahim@example.com\` | \`${credentials.customerPassword}\` |
+| Fatima Lawal | \`fatima@example.com\` | \`${credentials.customerPassword}\` |
+| Chidi Okeke | \`chidi@example.com\` | \`${credentials.customerPassword}\` |
+| Zainab Yusuf | \`zainab@example.com\` | \`${credentials.customerPassword}\` |
+| Emeka Nwosu | \`emeka@example.com\` | \`${credentials.customerPassword}\` |
 
 All six have order history behind them, so "My orders" is worth opening.
 

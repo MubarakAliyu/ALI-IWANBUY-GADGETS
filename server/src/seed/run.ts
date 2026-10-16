@@ -6,7 +6,6 @@
  * history arrive in the later batches and slot in beside `seedCatalogue` without changing it.
  */
 
-import path from "node:path";
 import type mongoose from "mongoose";
 import { env } from "../config/env.js";
 import { connectDatabase, disconnectDatabase } from "../db.js";
@@ -19,19 +18,11 @@ import { SEED_PRODUCTS } from "./data/products.js";
 import { SEED_BRANDS, SEED_CATEGORIES } from "./data/taxonomy.js";
 import { STORE_SETTINGS } from "./data/store-settings.js";
 import { writePlaceholderImage } from "./placeholder-image.js";
-import {
-  DEMO_ADMIN_PASSWORD,
-  DEMO_ADMINS,
-  DEMO_CUSTOMER_PASSWORD,
-  seedAdmins,
-  seedCustomers,
-  seedOrderHistory,
-} from "./demo.js";
+import { demoAdmins, seedAdmins, seedCustomers, seedOrderHistory } from "./demo.js";
 import { writeDemoAccounts } from "./demo-accounts.js";
+import { resolveDemoCredentials } from "./demo-credentials.js";
 
 export async function seedCatalogue(): Promise<{ categories: number; brands: number; products: number }> {
-  const imageDir = path.resolve(process.cwd(), env.UPLOAD_DIR, "seed");
-
   await Promise.all([
     Setting.deleteMany({}),
     Category.deleteMany({}),
@@ -95,7 +86,6 @@ export async function seedCatalogue(): Promise<{ categories: number; brands: num
     const slug = slugify(seed.name);
     const modelCode = suggestModelCode(seed.name, brand.name);
     const imageUrl = await writePlaceholderImage({
-      directory: imageDir,
       slug,
       brand: brand.name,
       name: seed.name.replace(new RegExp(`^${brand.name}\\s+`, "i"), ""),
@@ -169,13 +159,17 @@ async function main(): Promise<void> {
     logger.warn("Seeding a PRODUCTION database because ALLOW_DEMO_SEED=true. Everything will be replaced.");
   }
 
+  // Before the database is touched: in production these come from the environment, and a missing or weak
+  // value stops the run here rather than half way through creating accounts.
+  const credentials = resolveDemoCredentials();
+
   await connectDatabase();
   const counts = await seedCatalogue();
 
-  const admins = await seedAdmins();
-  const customers = await seedCustomers();
+  const admins = await seedAdmins(credentials);
+  const customers = await seedCustomers(credentials);
   const history = await seedOrderHistory({ admins, customers });
-  await writeDemoAccounts();
+  await writeDemoAccounts(credentials);
 
   const variants = SEED_PRODUCTS.reduce((sum, product) => sum + product.variants.length, 0);
   const outOfStock = SEED_PRODUCTS.filter((product) =>
@@ -196,12 +190,12 @@ async function main(): Promise<void> {
   );
   console.log("");
   console.log("  Demo sign-ins — also written to docs/DEMO-ACCOUNTS.md:");
-  for (const admin of DEMO_ADMINS) {
+  for (const admin of demoAdmins(credentials)) {
     console.log(
-      `    ${admin.role.padEnd(8)} ${admin.email.padEnd(28)} ${DEMO_ADMIN_PASSWORD}${admin.pin ? `  PIN ${admin.pin}` : ""}`,
+      `    ${admin.role.padEnd(8)} ${admin.email.padEnd(28)} ${credentials.adminPassword}${admin.pin ? `  PIN ${admin.pin}` : ""}`,
     );
   }
-  console.log(`    CUSTOMER amina@example.com           ${DEMO_CUSTOMER_PASSWORD}`);
+  console.log(`    CUSTOMER amina@example.com           ${credentials.customerPassword}`);
   console.log("");
 
   await disconnectDatabase();

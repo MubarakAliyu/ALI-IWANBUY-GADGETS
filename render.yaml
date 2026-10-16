@@ -41,9 +41,15 @@ services:
       - key: ADMIN_JWT_SECRET
         generateValue: true
 
-      # Product images and invoice PDFs. Render's disk does not survive a deploy, so production uses the CDN.
+      # Where uploaded product images go. Set this in the dashboard, not here, so the first deploy can go out
+      # on `local` and move to `cloudinary` later without a commit.
+      #
+      #   local       — works immediately, needs nothing else, but Render's disk is wiped on every deploy, so
+      #                 uploaded product images are lost. The API logs one warning at boot saying so. Invoice
+      #                 PDFs are unaffected: they re-render from the order on demand.
+      #   cloudinary  — uploads survive. Also set CLOUDINARY_URL.
       - key: STORAGE_PROVIDER
-        value: cloudinary
+        sync: false
       - key: CLOUDINARY_URL
         sync: false
 

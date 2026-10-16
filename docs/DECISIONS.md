@@ -147,3 +147,21 @@ should: catalogue listings are statically rendered and revalidate every 60 secon
 created a second ago is legitimately not in them. A new product's own page has no cached copy and is rendered
 on demand, so it is there immediately — which is the claim worth testing. The listing catches up within the
 minute, which is the documented behaviour rather than a defect.
+
+**ADR-025 · 16 Oct 2026 · Demo credentials come from the environment in production.** The passwords and PINs
+for the seeded demo accounts were constants in `server/src/seed/demo.ts`. That is right for a classroom and
+wrong for a public repository: those accounts can confirm payments, so anyone reading the source could sign
+in to the live dashboard and mark orders paid. In production the seed now reads `DEMO_ADMIN_PASSWORD`,
+`DEMO_CUSTOMER_PASSWORD`, `DEMO_OWNER_PIN` and `DEMO_MANAGER_PIN`, refuses while naming any that are missing,
+and refuses weak values too — passwords under ten characters, and PINs that are a run, a repeat or a date —
+because "put it in the environment" is no improvement if what gets put there is `1234`. The check runs before
+the database is touched. Outside production the old constants remain the defaults: a demo password nobody can
+remember is no use.
+
+**ADR-026 · 16 Oct 2026 · The first deployment runs on local storage.** Cloudinary sign-up was unavailable, so
+`STORAGE_PROVIDER` moved out of `render.yaml` and into the dashboard (`sync: false`) and the first deployment
+goes out on `local`. Everything works; the cost is that Render's disk is wiped on every deploy, so uploaded
+product images are lost. The API logs one warning at boot saying exactly that rather than refusing to start —
+this is a supported setup, just a lossy one. Invoice PDFs are unaffected because they re-render on demand
+(ADR-021). Switching later is two dashboard settings and a re-seed, with no code change, because the seed now
+writes its placeholder images through the storage interface rather than straight to disk.
