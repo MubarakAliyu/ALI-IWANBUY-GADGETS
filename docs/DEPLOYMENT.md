@@ -211,6 +211,22 @@ The sender address must be verified in Brevo first, or everything is silently dr
 4. **Create** and wait for the first deploy. Then open `https://<service>.onrender.com/api/health` — it must
    answer `{"ok":true,"db":"up"}`. If `db` says `down`, the Atlas user, password or network access is wrong.
 
+**How the API is built on Render**, and why it looks like that:
+
+```
+npx --yes pnpm@10.34.5 install --frozen-lockfile --prod=false &&
+npx --yes pnpm@10.34.5 --filter @aib/shared build &&
+npx --yes pnpm@10.34.5 --filter @aib/server build
+```
+
+| Part                                             | Why                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npx pnpm@10.34.5` rather than `corepack enable` | Corepack tries to unlink `/usr/bin/pnpm`, which is on a read-only filesystem on Render's image: `EROFS: read-only file system, unlink '/usr/bin/pnpm'`. `npx` fetches pnpm into the build's own cache instead. The version is pinned to `packageManager` in `package.json` so the lockfile is read by the pnpm that wrote it. |
+| `--prod=false`                                   | `NODE_ENV=production` is set on the service, so pnpm would skip `devDependencies` — including TypeScript, which both builds need.                                                                                                                                                                                             |
+| Two `--filter` builds, shared first              | `@aib/server` imports `@aib/shared`, and reads its compiled output, so the order matters. The client is not built here; that is Vercel's job.                                                                                                                                                                                 |
+| `NODE_VERSION=22` and `.node-version`            | Render otherwise reads `engines` and takes the newest version that satisfies it — which picked **Node 26**. `engines` is `22.x` now, and both files say 22 so there is nothing to guess.                                                                                                                                      |
+| `MONGOMS_DISABLE_POSTINSTALL=1`                  | `mongodb-memory-server` downloads a MongoDB binary in its postinstall. It is a test-only dependency and the build has no use for it.                                                                                                                                                                                          |
+
 **5 · Vercel (client)**
 
 1. <https://vercel.com> → **Add New** → **Project** → the same repository.

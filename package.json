@@ -6,7 +6,7 @@
   "description": "ALI_IWANBUY Gadgets — MERN storefront and admin dashboard for ALI_IWANBUY INTEGRATED SERVICE LTD",
   "packageManager": "pnpm@10.34.5",
   "engines": {
-    "node": ">=22.0.0"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "pnpm --filter @aib/shared build && concurrently -n server,client -c blue,magenta \"pnpm --filter @aib/server dev\" \"pnpm --filter @aib/client dev\"",

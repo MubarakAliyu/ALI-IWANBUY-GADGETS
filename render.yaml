@@ -14,8 +14,16 @@ services:
     plan: free
     branch: main
 
-    # pnpm is not on the default image, so corepack turns it on from the version in package.json.
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @aib/shared build && pnpm --filter @aib/server build
+    # pnpm is not on the image, and `corepack enable` cannot put it there: it tries to unlink
+    # /usr/bin/pnpm on a read-only filesystem and fails with EROFS. `npx` fetches it into the build's own
+    # cache instead, pinned to the same version as `packageManager` in package.json so the lockfile matches.
+    #
+    # `--prod=false` is required because NODE_ENV=production is set below, and pnpm would otherwise skip the
+    # devDependencies — including TypeScript, which both builds need.
+    buildCommand: >-
+      npx --yes pnpm@10.34.5 install --frozen-lockfile --prod=false &&
+      npx --yes pnpm@10.34.5 --filter @aib/shared build &&
+      npx --yes pnpm@10.34.5 --filter @aib/server build
     startCommand: node server/dist/index.js
 
     healthCheckPath: /api/health
@@ -25,6 +33,17 @@ services:
         value: production
       - key: PORT
         value: 10000 # Render's own port; the app reads it from the environment.
+
+      # Pin the runtime. Without this Render reads `engines` and takes the newest version that satisfies it —
+      # which picked Node 26 and is not what any of this was built or tested against. `.node-version` at the
+      # repo root says the same thing; this is here so the blueprint is explicit about it.
+      - key: NODE_VERSION
+        value: 22
+
+      # `mongodb-memory-server` downloads a MongoDB binary in its postinstall hook. It is a devDependency used
+      # only by the test suite, and the build has no use for ~100MB of it.
+      - key: MONGOMS_DISABLE_POSTINSTALL
+        value: 1
 
       # Atlas connection string, including the database user's password.
       - key: MONGODB_URI
